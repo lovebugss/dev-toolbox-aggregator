@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dev Toolbox Aggregator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?f8b3233a71fdd2b1a529caa44dbe729d";
+      var s = document.getElementsByTagName("script")[0]; 
+      s.parentNode.insertBefore(hm, s);
+    })();
+    </script>
+
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              // Light theme (New Bright)
+              'primary': '#F9FAFB',      // gray-50
+              'secondary': '#FFFFFF',    // white
+              'accent': '#4338CA',      // indigo-700
+              'border-color': '#E5E7EB', // gray-200
+              'text-primary': '#111827',   // gray-900
+              'text-secondary': '#6B7280', // gray-500
+
+              // Dark theme (New Slate)
+              'd-primary': '#0F172A',       // slate-900
+              'd-secondary': '#1E293B',     // slate-800
+              'd-accent': '#6366F1',       // indigo-500
+              'd-border-color': '#334155',   // slate-700
+              'd-text-primary': '#F1F5F9',     // slate-100
+              'd-text-secondary': '#94A3B8',   // slate-400
+
+              // Gradients
+              'grad-1-start': '#F97316', 'grad-1-end': '#FBBF24',
+              'grad-2-start': '#EC4899', 'grad-2-end': '#D946EF',
+              'grad-3-start': '#22C55E', 'grad-3-end': '#14B8A6',
+              'grad-4-start': '#3B82F6', 'grad-4-end': '#8B5CF6',
+              'grad-5-start': '#6366F1', 'grad-5-end': '#A855F7',
+              'grad-6-start': '#EF4444', 'grad-6-end': '#F97316',
+              'grad-7-start': '#334155', 'grad-7-end': '#0F172A',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsondiffpatch/dist/formatters-styles/html.css" type="text/css" />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        overflow-x: hidden;
+        color: #111827; /* text-primary */
+      }
+      .dark body {
+        color: #F1F5F9; /* d-text-primary */
+      }
+      /* Custom scrollbar for a cleaner look */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: transparent; }
+      ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 4px; }
+      .dark ::-webkit-scrollbar-thumb { background: #334155; }
+      ::-webkit-scrollbar-thumb:hover { background: #D1D5DB; }
+      .dark ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+      .text-shadow {
+        text-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      }
+      .dark .text-shadow-dark {
+        text-shadow: 0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.2);
+      }
+      
+      /* jsondiffpatch theme integration */
+      .jsondiffpatch-delta { font-family: monospace; background-color: transparent !important; font-size: 0.875rem; }
+      .jsondiffpatch-property-name { color: #111827; }
+      .dark .jsondiffpatch-property-name { color: #F1F5F9; }
+      .jsondiffpatch-unchanged, .jsondiffpatch-movedestination, .jsondiffpatch-unchanged-showing .jsondiffpatch-property-name, .jsondiffpatch-unchanged-showing .jsondiffpatch-value { color: #6B7280; }
+      .dark .jsondiffpatch-unchanged, .dark .jsondiffpatch-movedestination, .dark .jsondiffpatch-unchanged-showing .jsondiffpatch-property-name, .dark .jsondiffpatch-unchanged-showing .jsondiffpatch-value { color: #94A3B8; }
+      .jsondiffpatch-added .jsondiffpatch-property-name, .jsondiffpatch-added .jsondiffpatch-value pre { color: #16A34A !important; }
+      .dark .jsondiffpatch-added .jsondiffpatch-property-name, .dark .jsondiffpatch-added .jsondiffpatch-value pre { color: #4ADE80 !important; }
+      .jsondiffpatch-modified .jsondiffpatch-right-value pre { color: #16A34A !important; }
+      .dark .jsondiffpatch-modified .jsondiffpatch-right-value pre { color: #4ADE80 !important; }
+      .jsondiffpatch-deleted .jsondiffpatch-property-name, .jsondiffpatch-deleted .jsondiffpatch-value pre, .jsondiffpatch-modified .jsondiffpatch-left-value pre { color: #DC2626 !important; text-decoration: line-through; }
+      .dark .jsondiffpatch-deleted .jsondiffpatch-property-name, .dark .jsondiffpatch-deleted .jsondiffpatch-value pre, .dark .jsondiffpatch-modified .jsondiffpatch-left-value pre { color: #F87171 !important; text-decoration: line-through; }
+      ul.jsondiffpatch-delta { list-style-type: none; padding-left: 20px; }
+
+      /* Toast Notifications */
+      #toast-portal { position: fixed; top: 1rem; right: 1rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.75rem; }
+      .toast { animation: toast-in 0.3s ease-out forwards; }
+      .toast.toast-out { animation: toast-out 0.3s ease-in forwards; }
+      @keyframes toast-in { from { opacity: 0; transform: translateX(100%); } to { opacity: 1; transform: translateX(0); } }
+      @keyframes toast-out { from { opacity: 1; transform: translateX(0); } to { opacity: 0; transform: translateX(100%); } }
+    
+      /* Utility to hide scrollbar but keep it scrollable */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Custom styles for nav dropdown */
+      .nav-dropdown-content {
+        opacity: 0;
+        visibility: hidden;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
+        min-width: 220px;
+        z-index: 50;
+        transition: opacity 0.2s ease-out, transform 0.2s ease-out, visibility 0.2s;
+      }
+      .nav-dropdown:hover .nav-dropdown-content {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* Keyboard shortcut hint */
+      kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.125rem 0.375rem;
+        font-family: monospace;
+        font-size: 0.75rem;
+        font-weight: 500;
+        background-color: #F3F4F6; /* gray-100 */
+        border: 1px solid #E5E7EB; /* gray-200 */
+        border-bottom-width: 2px;
+        border-radius: 0.375rem;
+        color: #4B5563; /* gray-600 */
+      }
+      .dark kbd {
+        background-color: #374151; /* gray-700 */
+        border-color: #4B5563; /* gray-600 */
+        color: #D1D5DB; /* gray-300 */
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.1.1/",
+    "react-dom": "https://aistudiocdn.com/react-dom@^19.1.1",
+    "react/": "https://aistudiocdn.com/react@^19.1.1/",
+    "react": "https://aistudiocdn.com/react@^19.1.1",
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@6.25.1",
+    "react-router": "https://aistudiocdn.com/react-router@6.25.1",
+    "@ffmpeg/util": "https://aistudiocdn.com/@ffmpeg/util@^0.12.2",
+    "jszip": "https://aistudiocdn.com/jszip@^3.10.1",
+    "react-i18next": "https://aistudiocdn.com/react-i18next@^15.7.3",
+    "uuid": "https://aistudiocdn.com/uuid@^11.1.0",
+    "@ffmpeg/ffmpeg": "https://aistudiocdn.com/@ffmpeg/ffmpeg@^0.12.15",
+    "i18next-browser-languagedetector": "https://aistudiocdn.com/i18next-browser-languagedetector@^8.2.0",
+    "gif.js.optimized": "https://aistudiocdn.com/gif.js.optimized@^1.0.1",
+    "jsondiffpatch": "https://aistudiocdn.com/jsondiffpatch@^0.7.3",
+    "js-yaml": "https://aistudiocdn.com/js-yaml@^4.1.0",
+    "i18next": "https://aistudiocdn.com/i18next@^25.5.1",
+    "fabric": "https://aistudiocdn.com/fabric@^6.7.1",
+    "diff": "https://aistudiocdn.com/diff@^8.0.2",
+    "react-icons/": "https://aistudiocdn.com/react-icons@^5.5.0/",
+    "xml-js": "https://aistudiocdn.com/xml-js@^1.6.11",
+    "qr-code-styling": "https://aistudiocdn.com/qr-code-styling@^1.9.2",
+    "gifuct-js": "https://aistudiocdn.com/gifuct-js@^2.1.2",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.17.0",
+    "react-syntax-highlighter": "https://aistudiocdn.com/react-syntax-highlighter@^15.5.0",
+    "react-syntax-highlighter/dist/esm/styles/prism": "https://aistudiocdn.com/react-syntax-highlighter@^15.5.0/dist/esm/styles/prism",
+    "refractor": "https://aistudiocdn.com/refractor@^4.0.0",
+    "react-syntax-highlighter/": "https://aistudiocdn.com/react-syntax-highlighter@^15.6.6/",
+    "ua-parser-js": "https://aistudiocdn.com/ua-parser-js@^1.0.37"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root"></div>
+    <div id="toast-portal"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Dev Toolbox Aggregator",
+  "description": "A versatile toolbox for developers and designers, offering a collection of handy utilities like a JSON formatter, color converter, text counter, image to Base64 converter, and a QR code generator, all in one streamlined interface.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
