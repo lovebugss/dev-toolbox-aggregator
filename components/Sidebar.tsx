@@ -100,7 +100,7 @@ const NavDropdown: React.FC<{
   );
 };
 
-const TopNav: React.FC<TopNavProps> = ({ 
+const TopNav: React.FC<TopNavProps> = ({
     activeTool, theme, setTheme,
     isMobileSidebarOpen, setIsMobileSidebarOpen,
     favorites, searchInputRef
@@ -108,7 +108,7 @@ const TopNav: React.FC<TopNavProps> = ({
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  
+
   const allTools = useMemo(() => toolCategories.flatMap(c => c.tools), []);
   const favoriteTools = useMemo(() => allTools.filter(tool => favorites.includes(tool.id)), [favorites, allTools]);
 
@@ -151,7 +151,7 @@ const TopNav: React.FC<TopNavProps> = ({
                         ))}
                     </nav>
                 </div>
-                
+
                 <div className="flex items-center gap-4">
                     <div className="relative hidden md:block">
                         <div className={`flex items-center glass-panel rounded-2xl px-4 py-2 transition-all duration-300 border border-white/10 ${isSearchFocused ? 'w-80 ring-2 ring-accent/50' : 'w-64'}`}>
@@ -193,9 +193,9 @@ const TopNav: React.FC<TopNavProps> = ({
                             </div>
                         )}
                     </div>
-                    
+
                     <div className="flex items-center gap-2">
-                        <LanguageSwitcher />
+                        {/*<LanguageSwitcher />*/}
                         <ThemeSwitcher theme={theme} setTheme={setTheme} />
                         <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-3 glass-panel rounded-2xl ml-2 border border-white/10 active:scale-95 transition-transform">
                             <MenuIcon className="w-5 h-5 text-text-primary dark:text-d-text-primary" />
@@ -205,7 +205,7 @@ const TopNav: React.FC<TopNavProps> = ({
             </div>
         </header>
 
-        <div 
+        <div
             className={`fixed inset-0 z-[100] transition-all duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto block' : 'opacity-0 pointer-events-none hidden'}`}
         >
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
@@ -222,9 +222,9 @@ const TopNav: React.FC<TopNavProps> = ({
                             <h3 className="px-4 mb-2 text-xs font-bold text-accent dark:text-indigo-400 uppercase tracking-widest opacity-70">{t(category.nameKey)}</h3>
                             <div className="space-y-1">
                                 {category.tools.map(tool => (
-                                    <Link 
-                                        key={tool.id} 
-                                        to={`/${tool.id}`} 
+                                    <Link
+                                        key={tool.id}
+                                        to={`/${tool.id}`}
                                         onClick={handleLinkClick}
                                         className={`flex items-center gap-4 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-lg' : 'text-text-primary dark:text-d-text-primary hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                     >
