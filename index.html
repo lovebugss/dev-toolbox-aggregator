@@ -31,6 +31,7 @@
               'aurora-2': 'aurora 30s infinite ease-in-out reverse',
               'aurora-3': 'aurora 22s infinite ease-in-out',
               'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'holographic': 'holographic 8s ease infinite',
             },
             keyframes: {
               blob: {
@@ -44,6 +45,10 @@
                 '25%': { transform: 'translate(10%, 15%) scale(1.1)' },
                 '50%': { transform: 'translate(-5%, 20%) scale(0.9)' },
                 '75%': { transform: 'translate(-15%, -10%) scale(1.05)' }
+              },
+              holographic: {
+                '0%, 100%': { backgroundPosition: '0% 50%' },
+                '50%': { backgroundPosition: '100% 50%' }
               }
             }
           }
@@ -72,33 +77,83 @@
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
       }
 
-      /* 针对首页卡片的特殊优化 */
+      /* 首页卡片样式 */
       .glass-card {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(0, 0, 0, 0.05);
-        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease, background 0.5s ease;
+        position: relative;
+        overflow: hidden;
+        /* 鼠标跟随变量默认中心 */
+        --mx: 50%;
+        --my: 50%;
+      }
+
+      /* 鼠标跟随的焦点亮光 */
+      .glass-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          600px circle at var(--mx) var(--my),
+          rgba(255, 255, 255, 0.4),
+          transparent 40%
+        );
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        z-index: 5;
+        pointer-events: none;
+      }
+
+      .glass-card:hover::before {
+        opacity: 1;
       }
 
       .glass-card:hover {
         background: rgba(255, 255, 255, 1);
-        border: 1px solid rgba(79, 70, 229, 0.2); /* 浅紫色边框 */
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
-        transform: translateY(-4px) scale(1.01);
+        border: 1px solid rgba(79, 70, 229, 0.2);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-8px) scale(1.02);
       }
 
+      /* 深色模式增强 */
       .dark .glass-card {
         background: rgba(30, 41, 59, 0.5); 
         border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
       }
 
+      /* 深色模式下的鼠标跟随全息遮罩 */
+      .dark .glass-card::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          800px circle at var(--mx) var(--my),
+          rgba(255, 255, 255, 0.08),
+          rgba(168, 85, 247, 0.05) 20%,
+          rgba(79, 70, 229, 0.03) 40%,
+          transparent 60%
+        );
+        opacity: 0;
+        mix-blend-mode: color-dodge;
+        transition: opacity 0.5s ease;
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .dark .glass-card:hover::after {
+        opacity: 1;
+      }
+
       .dark .glass-card:hover {
         background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(99, 102, 241, 0.3); 
-        box-shadow: 0 0 30px -5px rgba(79, 70, 229, 0.2); 
-        transform: translateY(-4px) scale(1.02);
+        border: 1px solid rgba(139, 92, 246, 0.4); 
+        box-shadow: 
+          0 0 30px -5px rgba(79, 70, 229, 0.3),
+          0 10px 40px -5px rgba(168, 85, 247, 0.2);
       }
 
       /* 网格背景 */

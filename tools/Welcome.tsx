@@ -15,17 +15,33 @@ const gradients = [
 
 const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> = ({ tool, onClick, gradient }) => {
   const { t } = useTranslation();
+  const cardRef = useRef<HTMLButtonElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    cardRef.current.style.setProperty('--mx', `${x}px`);
+    cardRef.current.style.setProperty('--my', `${y}px`);
+  };
   
   return (
     <button
+      ref={cardRef}
       onClick={onClick}
-      className="glass-card group relative p-6 text-left rounded-[2rem] overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-accent"
+      onMouseMove={handleMouseMove}
+      className="glass-card group relative p-6 text-left rounded-[2.5rem] overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-accent"
     >
+      {/* Holographic Subtle Pearl Overlay (Follows Mouse indirectly via radial masks in CSS) */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity duration-700 bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 z-0"></div>
+      
       <div className="relative z-10 flex flex-col h-full">
-        <div className={`w-14 h-14 mb-6 rounded-2xl flex items-center justify-center bg-gradient-to-br ${gradient} shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform duration-500`}>
+        <div className={`w-14 h-14 mb-6 rounded-2xl flex items-center justify-center bg-gradient-to-br ${gradient} shadow-lg shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
           <tool.icon className="w-7 h-7 text-white" />
         </div>
-        <h3 className="text-xl font-bold text-text-primary dark:text-d-text-primary group-hover:text-accent dark:group-hover:text-indigo-400 transition-colors text-readable">
+        <h3 className="text-xl font-bold text-text-primary dark:text-d-text-primary group-hover:text-accent dark:group-hover:text-indigo-300 transition-colors text-readable">
             {t(tool.nameKey)}
         </h3>
         <p className="mt-2 text-sm text-text-secondary dark:text-slate-400 line-clamp-2 font-medium">
@@ -33,9 +49,8 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
         </p>
       </div>
       
-      {/* Refractive Light Effect - Subtle blue glow in Light mode, indigo in Dark mode */}
-      <div className="absolute top-0 right-0 -mr-4 -mt-4 w-32 h-32 bg-blue-400/5 dark:bg-indigo-500/5 blur-3xl rounded-full group-hover:bg-blue-400/10 dark:group-hover:bg-indigo-500/10 transition-all duration-500"></div>
-      <div className="absolute bottom-0 left-0 -ml-4 -mb-4 w-20 h-20 bg-purple-400/5 dark:bg-fuchsia-500/5 blur-2xl rounded-full group-hover:bg-purple-400/10 dark:group-hover:bg-fuchsia-500/10 transition-all duration-700"></div>
+      {/* Dynamic Static Glows (The responsive ones are in index.html ::before and ::after) */}
+      <div className="absolute top-0 right-0 -mr-4 -mt-4 w-32 h-32 bg-blue-400/5 dark:bg-indigo-500/10 blur-3xl rounded-full group-hover:bg-blue-400/10 dark:group-hover:bg-indigo-500/20 transition-all duration-500"></div>
     </button>
   );
 };
@@ -81,7 +96,7 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
         </p>
       </div>
 
-      <div className="space-y-24">
+      <div className="space-y-24 pb-20">
         {recentToolsData.length > 0 && (
           <section>
             <div className="flex items-center gap-4 mb-10">
@@ -104,7 +119,7 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
                     <span className="w-2 h-8 bg-accent dark:bg-indigo-500 rounded-full shadow-lg shadow-accent/20"></span>
                     {t(category.nameKey)}
                 </h2>
-                <span className="text-xs font-bold text-accent dark:text-indigo-400 bg-accent/10 dark:bg-indigo-400/10 px-3 py-1 rounded-full uppercase tracking-widest border border-accent/20 dark:border-indigo-400/20">{category.tools.length} Tools</span>
+                <span className="text-xs font-bold text-accent dark:text-indigo-400 bg-accent/10 dark:bg-indigo-400/10 px-4 py-1.5 rounded-full uppercase tracking-widest border border-accent/20 dark:border-indigo-400/20">{category.tools.length} Tools</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {category.tools.map((tool) => (
