@@ -245,10 +245,8 @@ const AppContent: React.FC = () => {
     
     const handleWelcomeToolClick = useCallback((toolId: ToolId) => {
       navigate(`/${toolId}`);
-      if (isMobile) {
-          setIsMobileSidebarOpen(false);
-      }
-    }, [navigate, isMobile]);
+      setIsMobileSidebarOpen(false);
+    }, [navigate]);
 
     const toggleFavorite = (toolId: ToolId) => {
       setFavorites(prev => 
@@ -279,9 +277,8 @@ const AppContent: React.FC = () => {
                       searchInputRef={searchInputRef}
                   />
               )}
-              {/**${isFullScreen ? 'p-0' : 'pt-20'} */}
-              <main className={`flex-1 overflow-y-auto `}>
-                  <div className={isFullScreen ? 'h-screen' : 'p-4 sm:p-6 md:p-8'}>
+              <main className="flex-1 flex flex-col overflow-hidden">
+                  <div className={`flex-1 overflow-y-auto custom-scrollbar ${isFullScreen ? 'h-screen' : 'p-4 sm:p-6 md:p-8'}`}>
                      <Routes>
                       <Route path="/" element={<Welcome setActiveTool={handleWelcomeToolClick} recentTools={recentTools} totalTools={allTools.length} usageCount={usageCount} />} />
                       {allTools.map(tool => (

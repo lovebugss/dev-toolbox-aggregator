@@ -29,7 +29,8 @@ const hexToRgb = (hex: string) => {
     } : { r: 0, g: 0, b: 0 };
 };
 
-const fontOptions = Object.values(StandardFonts);
+// FIX: Cast fontOptions to string[] to resolve unknown type issues in map
+const fontOptions = Object.values(StandardFonts) as string[];
 const positionOptions: WatermarkState['position'][] = ['center', 'topLeft', 'topRight', 'bottomLeft', 'bottomRight'];
 
 const PdfWatermark: React.FC = () => {

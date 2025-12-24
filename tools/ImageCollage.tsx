@@ -1,7 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import * as fabric from 'fabric';
+import { parseGIF, decompressFrames } from 'gifuct-js';
+import { useToolState } from '../contexts/ToolStateContext';
+import { useToasts } from '../contexts/ToastContext';
 import { ToolHeader } from '../components/ui/ToolHeader';
+import { EmptyState } from '../components/ui/EmptyState';
 import { LabeledControl } from '../components/ui/LabeledControl';
 import { 
     DownloadIcon, RefreshIcon, TrashIcon, TypeIcon, LayersIcon,
@@ -412,16 +416,15 @@ const ImageCollage: React.FC = () => {
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
-        const currentFileRef = singleFileRef.current; // Capture ref state to prevent race condition
+        const currentFileRef = singleFileRef.current; 
 
         if (currentFileRef) {
-            const { cellIndex } = currentFileRef; // Destructure before async
-            // FIX: Explicitly cast files[0] as File and then as Blob to satisfy readAsDataURL which expects a Blob.
-            const file = (files as FileList)[0] as File;
+            const { cellIndex } = currentFileRef; 
+            const file = files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (event) => setPlacedImages(prev => ({ ...prev, [cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-                reader.readAsDataURL(file as Blob);
+                reader.readAsDataURL(file);
             }
         } else {
             const canvas = fabricCanvasRef.current;
@@ -430,18 +433,17 @@ const ImageCollage: React.FC = () => {
             
             let newImages = {...placedImages};
             let filesAdded = 0;
-            // FIX: Explicitly cast Array.from result to File[] to avoid 'unknown' type errors during iteration.
-            (Array.from(files as FileList) as File[]).slice(0, availableSlots.length).forEach((file, i) => {
+            const fileList = Array.from(files);
+            fileList.slice(0, availableSlots.length).forEach((file, i) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     newImages[availableSlots[i]] = { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 };
                     filesAdded++;
-                    if (filesAdded === Math.min(files.length, availableSlots.length)) {
+                    if (filesAdded === Math.min(fileList.length, availableSlots.length)) {
                         setPlacedImages(newImages);
                     }
                 };
-                // FIX: Explicitly cast file to Blob for readAsDataURL.
-                reader.readAsDataURL(file as Blob);
+                reader.readAsDataURL(file);
             });
         }
         e.target.value = '';
@@ -588,7 +590,7 @@ const ImageCollage: React.FC = () => {
     return (
         <div>
             <ToolHeader title={t('tools.imageCollage.pageTitle')} description={t('tools.imageCollage.pageDescription')} />
-            <input type="file" min-h-[65vh] max-h-[65vh] ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             
             <div className="bg-secondary dark:bg-d-secondary rounded-xl border border-border-color dark:border-d-border-color shadow-lg">
                 <div className="flex items-center gap-2 md:gap-4 p-2 border-b border-border-color dark:border-d-border-color">
@@ -768,8 +770,12 @@ const CanvasSettingsPanel: React.FC<{settings: any, setSettings: any, isRatioLoc
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                setSettings((s: any) => ({...s, backgroundImage: event.target?.result as string, backgroundType: 'image'}));
+                const result = event.target?.result;
+                if (typeof result === 'string') {
+                    setSettings((s: any) => ({...s, backgroundImage: result, backgroundType: 'image'}));
+                }
             };
+            // FIX: Cast file to Blob to resolve TypeScript error where 'file' might be inferred as unknown or {}.
             reader.readAsDataURL(file as Blob);
         }
         e.target.value = '';
@@ -788,7 +794,7 @@ const CanvasSettingsPanel: React.FC<{settings: any, setSettings: any, isRatioLoc
             <LabeledControl label={t('tools.imageCollage.canvasSize')}>
                 <div className="flex gap-2 items-center">
                     <input type="number" value={settings.width} onChange={e => handleWidthChange(parseInt(e.target.value, 10) || 100)} className="w-full p-2 text-center bg-primary dark:bg-d-primary rounded-md" />
-                    <button onClick={toggleLock} title={t('tools.imageCollage.aspectRatioLock') as string} className="p-2 rounded-md hover:bg-primary dark:hover:bg-d-primary">{isRatioLocked ? <LockIcon className="w-4 h-4"/> : <UnlockIcon className="w-4 h-4"/>}</button>
+                    <button onClick={toggleLock} title={t('tools.imageCollage.aspectRatioLock') as string} className="p-2 rounded-md hover:bg-primary dark:hover:bg-d-border-color">{isRatioLocked ? <LockIcon className="w-4 h-4"/> : <UnlockIcon className="w-4 h-4"/>}</button>
                     <input type="number" value={settings.height} onChange={e => handleHeightChange(parseInt(e.target.value, 10) || 100)} className="w-full p-2 text-center bg-primary dark:bg-d-primary rounded-md" />
                 </div>
             </LabeledControl>
@@ -855,12 +861,11 @@ const ImageSettingsPanel: React.FC<{activeCellIndex: number, placedImages: Recor
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
-        const file = files ? (files as FileList)[0] as File : null;
-        if (file && singleFileRef.current) {
+        if (files && files[0] && singleFileRef.current) {
+            const file = files[0];
             const reader = new FileReader();
             reader.onload = (event) => setPlacedImages((prev: Record<number, PlacedImage>) => ({ ...prev, [singleFileRef.current!.cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-            // FIX: Explicitly cast file to Blob for readAsDataURL.
-            reader.readAsDataURL(file as Blob);
+            reader.readAsDataURL(file);
         }
         e.target.value = ''; singleFileRef.current = null;
     };

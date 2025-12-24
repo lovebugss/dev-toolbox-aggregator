@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ToolId, toolCategories, Tool, ToolCategory } from '../types';
-import { ToolboxIcon, SunIcon, MoonIcon, SearchIcon, MenuIcon, VscChevronDownIcon } from './icons/Icons';
+import { ToolboxIcon, SunIcon, MoonIcon, SearchIcon, MenuIcon, VscChevronDownIcon, CloseIcon } from './icons/Icons';
 
 interface TopNavProps {
   activeTool: ToolId | null;
@@ -77,12 +77,13 @@ const NavDropdown: React.FC<{
   const { t } = useTranslation();
   return (
     <div className="relative group/nav">
-      <button className="flex items-center gap-1.5 text-sm font-semibold py-2 px-3 rounded-xl hover:bg-white/20 dark:hover:bg-white/5 transition-all text-text-primary dark:text-d-text-primary">
+      <button className="flex items-center gap-1.5 text-sm font-semibold py-2 px-3 rounded-xl hover:bg-white/20 dark:hover:bg-white/5 transition-all text-text-primary dark:text-d-text-primary whitespace-nowrap">
         <span className="text-readable">{categoryName}</span>
         <VscChevronDownIcon className="w-4 h-4 transition-transform group-hover/nav:rotate-180 opacity-70" />
       </button>
-      <div className="invisible group-hover/nav:visible opacity-0 group-hover/nav:opacity-100 absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[220px] transition-all duration-300 translate-y-2 group-hover/nav:translate-y-0 z-50">
-        <div className="glass-panel p-2 rounded-2xl overflow-hidden backdrop-blur-3xl shadow-2xl">
+      {/* 核心修复：初始状态使用 hidden，仅在 hover 时变为 block，彻底防止加载时的瞬时展开 */}
+      <div className="hidden group-hover/nav:block absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[240px] z-50 animate-in fade-in zoom-in-95 duration-200">
+        <div className="bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl p-2 rounded-2xl border border-black/5 dark:border-white/10 shadow-2xl">
             <ul className="space-y-1">
             {tools.map(tool => (
                 <li key={tool.id}>
@@ -100,11 +101,11 @@ const NavDropdown: React.FC<{
 };
 
 const TopNav: React.FC<TopNavProps> = ({ 
-    activeTool, theme, setTheme, isMobile,
+    activeTool, theme, setTheme,
     isMobileSidebarOpen, setIsMobileSidebarOpen,
     favorites, searchInputRef
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
@@ -125,87 +126,121 @@ const TopNav: React.FC<TopNavProps> = ({
   }, [searchQuery, t]);
 
   const handleLinkClick = () => {
-    if (isMobile) setIsMobileSidebarOpen(false);
+    setIsMobileSidebarOpen(false);
     setSearchQuery('');
     setIsSearchFocused(false);
     searchInputRef.current?.blur();
   };
 
   return (
-    <header className="sticky top-0 z-40 h-20 w-full px-4 sm:px-6 lg:px-8">
-        <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
-            <div className="flex items-center gap-8">
-                <Link to="/" className="flex items-center gap-3 group">
-                    <div className="p-2 glass-panel rounded-2xl group-hover:scale-110 transition-transform bg-accent shadow-indigo-500/30 shadow-lg">
-                        <ToolboxIcon className="w-6 h-6 text-white" />
-                    </div>
-                    <h1 className="text-xl font-extrabold text-text-primary dark:text-d-text-primary hidden sm:block tracking-tight text-readable">DevToolbox</h1>
-                </Link>
+    <>
+        <header className="sticky top-0 z-40 h-20 w-full px-4 sm:px-6 lg:px-8 flex-shrink-0 bg-transparent">
+            <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
+                <div className="flex items-center gap-4 lg:gap-8">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <div className="p-2 glass-panel rounded-2xl group-hover:scale-110 transition-transform bg-accent shadow-indigo-500/30 shadow-lg">
+                            <ToolboxIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <h1 className="text-xl font-extrabold text-text-primary dark:text-d-text-primary hidden sm:block tracking-tight text-readable">DevToolbox</h1>
+                    </Link>
 
-                {!isMobile && (
-                    <nav className="flex items-center glass-panel px-2 py-1 rounded-2xl border border-white/10">
+                    {/* 响应式重构：使用 hidden lg:flex 类名，确保由浏览器底层控制显隐，避免 React 状态闪烁 */}
+                    <nav className="hidden lg:flex items-center glass-panel px-2 py-1 rounded-2xl border border-white/10">
                         {favoriteTools.length > 0 && <NavDropdown categoryName={t('sidebar.favorites')} tools={favoriteTools} activeTool={activeTool} onLinkClick={handleLinkClick} />}
                         {toolCategories.map(category => (
                             <NavDropdown key={category.nameKey} categoryName={t(category.nameKey)} tools={category.tools} activeTool={activeTool} onLinkClick={handleLinkClick} />
                         ))}
                     </nav>
-                )}
-            </div>
-            
-            <div className="flex items-center gap-4">
-                <div className="relative hidden md:block">
-                    <div className={`flex items-center glass-panel rounded-2xl px-4 py-2 transition-all duration-300 border border-white/10 ${isSearchFocused ? 'w-80 ring-2 ring-accent/50' : 'w-64'}`}>
-                        <SearchIcon className="w-4 h-4 text-text-secondary dark:text-d-text-secondary mr-2" />
-                        <input
-                            ref={searchInputRef}
-                            type="text"
-                            placeholder={t('sidebar.searchPlaceholder')}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onFocus={() => setIsSearchFocused(true)}
-                            onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
-                            className="bg-transparent text-sm w-full outline-none text-text-primary dark:text-d-text-primary placeholder:text-text-secondary/50 dark:placeholder:text-d-text-secondary/50"
-                        />
-                    </div>
-                    {isSearchFocused && searchQuery && (
-                        <div className="absolute top-full mt-2 w-full glass-panel p-2 rounded-2xl shadow-2xl z-50 border border-white/20">
-                            {groupedFilteredTools.length > 0 ? (
-                                <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                                    {groupedFilteredTools.map(({ category, tools }) => (
-                                        <div key={category.nameKey} className="mb-2 last:mb-0">
-                                            <h3 className="px-3 pt-2 pb-1 text-[10px] font-bold text-accent dark:text-indigo-400 uppercase tracking-widest">{t(category.nameKey)}</h3>
-                                            <ul className="space-y-1">
-                                                {tools.map(tool => (
-                                                    <li key={tool.id}>
-                                                        <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-indigo-400/10 transition-colors">
-                                                            <tool.icon className="w-4 h-4 text-accent dark:text-indigo-400" />
-                                                            <span className="text-sm font-medium text-text-primary dark:text-d-text-primary">{t(tool.nameKey)}</span>
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="p-4 text-center text-sm text-text-secondary dark:text-d-text-secondary">{t('sidebar.noResults')}</div>
-                            )}
-                        </div>
-                    )}
                 </div>
                 
-                <div className="flex items-center gap-2">
-                    <LanguageSwitcher />
-                    <ThemeSwitcher theme={theme} setTheme={setTheme} />
-                    {isMobile && (
-                        <button onClick={() => setIsMobileSidebarOpen(true)} className="p-3 glass-panel rounded-2xl ml-2 border border-white/10">
+                <div className="flex items-center gap-4">
+                    <div className="relative hidden md:block">
+                        <div className={`flex items-center glass-panel rounded-2xl px-4 py-2 transition-all duration-300 border border-white/10 ${isSearchFocused ? 'w-80 ring-2 ring-accent/50' : 'w-64'}`}>
+                            <SearchIcon className="w-4 h-4 text-text-secondary dark:text-d-text-secondary mr-2" />
+                            <input
+                                ref={searchInputRef}
+                                type="text"
+                                placeholder={t('sidebar.searchPlaceholder')}
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => setIsSearchFocused(true)}
+                                onBlur={() => setTimeout(() => setIsSearchFocused(false), 200)}
+                                className="bg-transparent text-sm w-full outline-none text-text-primary dark:text-d-text-primary placeholder:text-text-secondary/50 dark:placeholder:text-d-text-secondary/50"
+                            />
+                        </div>
+                        {isSearchFocused && searchQuery && (
+                            <div className="absolute top-full mt-2 w-full bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl p-2 rounded-2xl shadow-2xl z-50 border border-black/5 dark:border-white/20">
+                                {groupedFilteredTools.length > 0 ? (
+                                    <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                                        {groupedFilteredTools.map(({ category, tools }) => (
+                                            <div key={category.nameKey} className="mb-2 last:mb-0">
+                                                <h3 className="px-3 pt-2 pb-1 text-[10px] font-bold text-accent dark:text-indigo-400 uppercase tracking-widest">{t(category.nameKey)}</h3>
+                                                <ul className="space-y-1">
+                                                    {tools.map(tool => (
+                                                        <li key={tool.id}>
+                                                            <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-indigo-400/10 transition-colors">
+                                                                <tool.icon className="w-4 h-4 text-accent dark:text-indigo-400" />
+                                                                <span className="text-sm font-medium text-text-primary dark:text-d-text-primary">{t(tool.nameKey)}</span>
+                                                            </Link>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 text-center text-sm text-text-secondary dark:text-d-text-secondary">{t('sidebar.noResults')}</div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="flex items-center gap-2">
+                        <LanguageSwitcher />
+                        <ThemeSwitcher theme={theme} setTheme={setTheme} />
+                        <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-3 glass-panel rounded-2xl ml-2 border border-white/10 active:scale-95 transition-transform">
                             <MenuIcon className="w-5 h-5 text-text-primary dark:text-d-text-primary" />
                         </button>
-                    )}
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {/* 移动端抽屉：增加 hidden 控制，确保在 isMobileSidebarOpen 为 false 时物理上不渲染，彻底根治闪烁 */}
+        <div 
+            className={`fixed inset-0 z-[100] transition-all duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto block' : 'opacity-0 pointer-events-none hidden'}`}
+        >
+            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
+            <div className={`absolute top-0 right-0 h-full w-[80%] max-w-sm bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+                <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5">
+                    <h2 className="text-xl font-bold text-readable">Menu</h2>
+                    <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl">
+                        <CloseIcon className="w-6 h-6" />
+                    </button>
+                </div>
+                <div className="p-4 overflow-y-auto h-[calc(100%-80px)] custom-scrollbar">
+                    {toolCategories.map(category => (
+                        <div key={category.nameKey} className="mb-6">
+                            <h3 className="px-4 mb-2 text-xs font-bold text-accent dark:text-indigo-400 uppercase tracking-widest opacity-70">{t(category.nameKey)}</h3>
+                            <div className="space-y-1">
+                                {category.tools.map(tool => (
+                                    <Link 
+                                        key={tool.id} 
+                                        to={`/${tool.id}`} 
+                                        onClick={handleLinkClick}
+                                        className={`flex items-center gap-4 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-lg' : 'text-text-primary dark:text-d-text-primary hover:bg-gray-100 dark:hover:bg-white/5'}`}
+                                    >
+                                        <tool.icon className="w-5 h-5" />
+                                        <span>{t(tool.nameKey)}</span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </div>
-    </header>
+    </>
   );
 };
 

@@ -30,6 +30,7 @@ const CommitMessageGenerator: React.FC = () => {
         setState(s => ({ ...s, isLoading: true, error: null, generatedMessage: '' }));
 
         try {
+            // FIX: Initializing GoogleGenAI with the recommended model for basic text tasks.
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
             
             const prompt = `You are an expert programmer who writes concise and conventional commit messages. Based on the following description of code changes, generate a commit message. The message must follow the Conventional Commits specification. The subject line should be 50 characters or less.
@@ -38,11 +39,13 @@ Changes:
 ${userInput}`;
 
             const response = await ai.models.generateContent({
-                model: 'gemini-2.5-flash',
+                // FIX: Use gemini-3-flash-preview for Basic Text Tasks as per guidelines.
+                model: 'gemini-3-flash-preview',
                 contents: prompt,
             });
 
-            setState(s => ({ ...s, generatedMessage: response.text.trim(), isLoading: false }));
+            // FIX: Accessing .text property directly as per guidelines.
+            setState(s => ({ ...s, generatedMessage: response.text?.trim() || '', isLoading: false }));
 
         } catch (err) {
             console.error(err);
@@ -55,7 +58,6 @@ ${userInput}`;
         navigator.clipboard.writeText(generatedMessage).then(() => {
             addToast(t('common.toast.copiedSuccess'), 'success');
         }, () => {
-            // FIX: Corrected translation key for copy failed message.
             addToast(t('common.toast.copiedFailed'), 'error');
         });
     };

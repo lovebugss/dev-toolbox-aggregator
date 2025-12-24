@@ -121,7 +121,8 @@ const UserAgentViewer: React.FC = () => {
                                 data={{ name: parsedUa.os.name, version: parsedUa.os.version }}
                             />
                              <InfoCard 
-                                icon={React.cloneElement(getDeviceIcon() as React.ReactElement, { className: "w-5 h-5" })} 
+                                // FIX: Added generic type any to ReactElement to allow className prop in cloneElement
+                                icon={React.cloneElement(getDeviceIcon() as React.ReactElement<any>, { className: "w-5 h-5" })} 
                                 title={t('tools.userAgentViewer.device')} 
                                 data={{ 
                                     vendor: parsedUa.device.vendor || t('tools.userAgentViewer.unknown'), 

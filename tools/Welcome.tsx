@@ -73,7 +73,7 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-screen-xl mx-auto px-4">
       <div className="text-center mb-24 relative">
         <h1 className="text-6xl lg:text-7xl font-black tracking-tight text-text-primary dark:text-d-text-primary drop-shadow-xl text-readable">
-            The Smartest <br/>
+            {/* The Smartest <br/> */}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400 dark:from-indigo-400 dark:to-purple-400">Dev Toolbox.</span>
         </h1>
         <p className="mt-6 text-xl max-w-2xl mx-auto text-text-secondary dark:text-d-text-secondary font-semibold leading-relaxed">
@@ -119,14 +119,13 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
           </section>
         ))}
       </div>
-
-      <div className="mt-32 pb-20">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <AdvantageCard icon={BrainIcon} title={t('welcome.advantages.inBrowser.title')} description={t('welcome.advantages.inBrowser.description')} />
-            <AdvantageCard icon={UnlockIcon} title={t('welcome.advantages.secure.title')} description={t('welcome.advantages.secure.description')} />
-            <AdvantageCard icon={LockIcon} title={t('welcome.advantages.private.title')} description={t('welcome.advantages.private.description')} />
-        </div>
-      </div>
+       {/* <div className="mt-32 pb-20">
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+             <AdvantageCard icon={BrainIcon} title={t('welcome.advantages.inBrowser.title')} description={t('welcome.advantages.inBrowser.description')} />
+             <AdvantageCard icon={UnlockIcon} title={t('welcome.advantages.secure.title')} description={t('welcome.advantages.secure.description')} />
+             <AdvantageCard icon={LockIcon} title={t('welcome.advantages.private.title')} description={t('welcome.advantages.private.description')} />
+         </div>
+       </div> */}
     </div>
   );
 };

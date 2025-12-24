@@ -19,12 +19,11 @@
               'secondary': 'rgba(255, 255, 255, 0.4)',
               'accent': '#4f46e5',
               'd-primary': '#0f172a',
-              'd-secondary': 'rgba(15, 23, 42, 0.6)', // 增加暗色不透明度
-              // 新增文字颜色体系
+              'd-secondary': 'rgba(15, 23, 42, 0.8)', // 进一步增加不透明度
               'text-primary': '#111827',
               'text-secondary': '#4B5563',
-              'd-text-primary': '#F9FAFB', // 纯净的浅灰白
-              'd-text-secondary': '#9CA3AF', // 柔和的灰色
+              'd-text-primary': '#FFFFFF', // 暗色模式使用纯白
+              'd-text-secondary': '#CBD5E1', // 暗色模式使用更亮的灰
             },
             animation: {
               'blob': 'blob 15s infinite ease-in-out',
@@ -47,9 +46,8 @@
         background-attachment: fixed;
       }
       
-      /* 全局可读性提升：暗色模式文字微阴影 */
       .dark .text-readable {
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
       }
 
       .glass-panel {
@@ -61,9 +59,9 @@
       }
 
       .dark .glass-panel {
-        background: rgba(15, 23, 42, 0.6); /* 增加暗色模式遮罩强度 */
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        background: rgba(15, 23, 42, 0.75); /* 显著增强暗色模式背景深度 */
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
       }
 
       .glass-card {
@@ -74,8 +72,8 @@
       }
       
       .dark .glass-card {
-        background: rgba(30, 41, 59, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.12);
       }
 
       .glass-card:hover {
@@ -86,16 +84,15 @@
       }
 
       .dark .glass-card:hover {
-        background: rgba(30, 41, 59, 0.6);
-        box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.15);
+        background: rgba(30, 41, 59, 0.7);
+        box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
-      /* 自定义滚动条适配暗色 */
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
-      .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); }
+      .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); }
 
       .blob-bg {
         position: fixed;
@@ -138,12 +135,18 @@
   }
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<script>
+  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+</script>
+<script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
 </head>
   <body class="bg-primary dark:bg-d-primary transition-colors duration-500">
     <div class="blob-bg">
-      <div class="absolute top-0 -left-4 w-72 h-72 bg-indigo-400 dark:bg-indigo-600/30 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob"></div>
-      <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-400 dark:bg-purple-600/30 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
-      <div class="absolute -bottom-8 left-20 w-72 h-72 bg-amber-300 dark:bg-amber-600/20 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
+      <!-- 大幅降低暗色模式气泡不透明度，从 0.3 降至 0.15 以确保不冲淡白色文字 -->
+      <div class="absolute top-0 -left-4 w-72 h-72 bg-indigo-400 dark:bg-indigo-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob"></div>
+      <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-400 dark:bg-purple-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
+      <div class="absolute -bottom-8 left-20 w-72 h-72 bg-amber-300 dark:bg-amber-600/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
     </div>
     <div id="root"></div>
     <div id="toast-portal"></div>
