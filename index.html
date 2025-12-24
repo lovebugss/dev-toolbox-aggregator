@@ -15,35 +15,24 @@
         theme: {
           extend: {
             colors: {
-              'primary': '#F8FAFC',
+              'primary': '#F3F4F6',
               'secondary': 'rgba(255, 255, 255, 0.4)',
               'accent': '#4f46e5',
-              'd-primary': '#020617',
-              'd-secondary': 'rgba(15, 23, 42, 0.8)',
+              'd-primary': '#0f172a',
+              'd-secondary': 'rgba(15, 23, 42, 0.8)', // 进一步增加不透明度
               'text-primary': '#111827',
               'text-secondary': '#4B5563',
-              'd-text-primary': '#F8FAFC',
-              'd-text-secondary': '#94A3B8',
+              'd-text-primary': '#FFFFFF', // 暗色模式使用纯白
+              'd-text-secondary': '#CBD5E1', // 暗色模式使用更亮的灰
             },
             animation: {
-              'blob': 'blob 20s infinite linear',
-              'aurora-1': 'aurora 25s infinite ease-in-out',
-              'aurora-2': 'aurora 30s infinite ease-in-out reverse',
-              'aurora-3': 'aurora 22s infinite ease-in-out',
-              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              'blob': 'blob 15s infinite ease-in-out',
             },
             keyframes: {
               blob: {
-                '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                '33%': { transform: 'translate(100px, -150px) scale(1.2)' },
-                '66%': { transform: 'translate(-80px, 50px) scale(0.8)' },
-                '100%': { transform: 'translate(0px, 0px) scale(1)' },
-              },
-              aurora: {
-                '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-                '25%': { transform: 'translate(10%, 15%) scale(1.1)' },
-                '50%': { transform: 'translate(-5%, 20%) scale(0.9)' },
-                '75%': { transform: 'translate(-15%, -10%) scale(1.05)' }
+                '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
+                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
               }
             }
           }
@@ -57,80 +46,61 @@
         background-attachment: fixed;
       }
       
-      /* 增强玻璃质感：更高对比度和饱和度 */
+      .dark .text-readable {
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+      }
+
       .glass-panel {
-        background: rgba(255, 255, 255, 0.55);
-        backdrop-filter: blur(30px) saturate(200%);
-        -webkit-backdrop-filter: blur(30px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        background: rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
       }
 
       .dark .glass-panel {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        background: rgba(15, 23, 42, 0.75); /* 显著增强暗色模式背景深度 */
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
       }
 
-      /* 线条结构网格：由点阵升级为更有科技感的线条 */
-      .grid-bg {
-        background-image: 
-          linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
-        background-size: 60px 60px;
-        mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 30%, transparent 100%);
-      }
-      .dark .grid-bg {
-        background-image: 
-          linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
-        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 100%);
-      }
-
-      /* 暗角阴影效果 */
-      .vignette {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.03) 100%);
-      }
-      .dark .vignette {
-        background: radial-gradient(circle at center, transparent 20%, rgba(2, 6, 23, 0.4) 100%);
-      }
-
-      .noise-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        opacity: 0.04;
-        pointer-events: none;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      }
-
-      .blob-bg {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: -2;
-        overflow: hidden;
-        pointer-events: none;
+      .glass-card {
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
       }
       
-      .aurora-blob {
-        position: absolute;
-        filter: blur(100px);
-        opacity: 0.4;
-        mix-blend-mode: soft-light;
+      .dark .glass-card {
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.12);
       }
-      .dark .aurora-blob {
-        opacity: 0.25;
-        mix-blend-mode: screen;
+
+      .glass-card:hover {
+        background: rgba(255, 255, 255, 0.35);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 40px -10px rgba(79, 70, 229, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+      }
+
+      .dark .glass-card:hover {
+        background: rgba(30, 41, 59, 0.7);
+        box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.2);
       }
 
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
-      .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); }
+      .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.5); }
+
+      .blob-bg {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: -1;
+        overflow: hidden;
+        pointer-events: none;
+      }
     </style>
   <script type="importmap">
 {
@@ -161,7 +131,10 @@
     "gifuct-js": "https://esm.sh/gifuct-js@^2.1.2",
     "ua-parser-js": "https://esm.sh/ua-parser-js@^2.0.7",
     "diff": "https://esm.sh/diff@^8.0.2",
-    "i18next": "https://esm.sh/i18next@^25.7.3"
+    "i18next": "https://esm.sh/i18next@^25.7.3",
+    "vite": "https://esm.sh/vite@^7.3.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
   }
 }
 </script>
@@ -170,24 +143,16 @@
   window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
 </script>
 <script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
+<link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-primary dark:bg-d-primary transition-colors duration-700 min-h-screen relative">
-    <!-- 1. 最底层颜色层 -->
+  <body class="bg-primary dark:bg-d-primary transition-colors duration-500">
     <div class="blob-bg">
-      <div class="aurora-blob aurora-1 top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500 rounded-full"></div>
-      <div class="aurora-blob aurora-2 top-[-15%] right-[-10%] w-[45%] h-[55%] bg-blue-600 rounded-full"></div>
-      <div class="aurora-blob aurora-3 bottom-[-10%] left-[20%] w-[60%] h-[50%] bg-fuchsia-600 rounded-full"></div>
-      <div class="aurora-blob aurora-1 bottom-[-5%] right-[-15%] w-[40%] h-[60%] bg-teal-500 rounded-full"></div>
+      <!-- 大幅降低暗色模式气泡不透明度，从 0.3 降至 0.15 以确保不冲淡白色文字 -->
+      <div class="absolute top-0 -left-4 w-72 h-72 bg-indigo-400 dark:bg-indigo-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob"></div>
+      <div class="absolute top-0 -right-4 w-72 h-72 bg-purple-400 dark:bg-purple-600/15 rounded-full mix-blend-multiply filter blur-3xl opacity-60 animate-blob animation-delay-2000"></div>
+      <div class="absolute -bottom-8 left-20 w-72 h-72 bg-amber-300 dark:bg-amber-600/10 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-4000"></div>
     </div>
-
-    <!-- 2. 线条网格层 -->
-    <div class="fixed inset-0 grid-bg z-[-1]"></div>
-    
-    <!-- 3. 暗角与颗粒层 -->
-    <div class="vignette"></div>
-    <div class="noise-overlay"></div>
-
-    <div id="root" class="relative z-0"></div>
+    <div id="root"></div>
     <div id="toast-portal"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
