@@ -30,12 +30,16 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        run: |
+      - name: Install with Jekyll
+        run:
           npm i
+      - name: Build with Jekyll
+        run:
           npm run build
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with: 
+          path: ./dist
 
   # Deployment job
   deploy:
