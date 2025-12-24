@@ -34,7 +34,8 @@ const AsciiArtGenerator: React.FC = () => {
     const { outputWidth, characterSet, isInverted, useColor } = state;
     
     const [sourceImage, setSourceImage] = useState<string | null>(null);
-    const [asciiArt, setAsciiArt] = useState<string | JSX.Element>('');
+    // FIX: Replaced JSX.Element with React.ReactNode to resolve namespace error.
+    const [asciiArt, setAsciiArt] = useState<string | React.ReactNode>('');
     const [isProcessing, setIsProcessing] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -90,7 +91,8 @@ const AsciiArtGenerator: React.FC = () => {
             const data = imageData.data;
             const chars = characterSet.split('');
 
-            let result: string | (JSX.Element | string)[] = useColor ? [] : '';
+            // FIX: Replaced JSX.Element with React.ReactNode to resolve namespace error.
+            let result: string | React.ReactNode[] = useColor ? [] : '';
             
             for (let y = 0; y < outputHeight; y++) {
                 for (let x = 0; x < outputWidth; x++) {
@@ -105,7 +107,8 @@ const AsciiArtGenerator: React.FC = () => {
                     const char = chars[charIndex];
 
                     if (useColor) {
-                        (result as (JSX.Element | string)[]).push(
+                        // FIX: Replaced JSX.Element with React.ReactNode to resolve namespace error.
+                        (result as React.ReactNode[]).push(
                             <span key={`${y}-${x}`} style={{ color: `rgb(${r},${g},${b})` }}>
                                 {char}
                             </span>
@@ -116,7 +119,8 @@ const AsciiArtGenerator: React.FC = () => {
                 }
                 if (y < outputHeight - 1) {
                     if (useColor) {
-                        (result as (JSX.Element | string)[]).push('\n');
+                        // FIX: Replaced JSX.Element with React.ReactNode to resolve namespace error.
+                        (result as React.ReactNode[]).push('\n');
                     } else {
                         result += '\n';
                     }

@@ -257,364 +257,283 @@ const GifSplitter: React.FC = () => {
         reader.readAsArrayBuffer(file);
     }, [resetState, t]);
 
-    const processImageFiles = useCallback(async (files: FileList) => {
-        const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-        if (imageFiles.length === 0) { setError(t('tools.gifCreator.errorNoImages')); return; }
+    const processImageFiles = useCallback((files: FileList) => {
         resetState();
         setIsLoading(true);
-        try {
-            const loadImage = (file: File): Promise<{ dataUrl: string; width: number; height: number; }> => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const dataUrl = e.target?.result as string;
-                    const img = new Image();
-                    img.onload = () => resolve({ dataUrl, width: img.width, height: img.height });
-                    img.onerror = reject;
-                    img.src = dataUrl;
-                };
-                reader.onerror = reject; reader.readAsDataURL(file);
-            });
-            const loadedImages = await Promise.all(imageFiles.map(loadImage));
-            if (loadedImages.length > 0) {
-                const firstImage = loadedImages[0];
-                const { width, height } = firstImage;
-                setGifInfo({ width, height });
+        const imageFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+        if (imageFiles.length === 0) {
+            setError(t('tools.gifCreator.errorNoImages'));
+            setIsLoading(false);
+            return;
+        }
 
-                const fabricTempCanvas = new fabric.Canvas(null as any, { width, height });
-
-                const newFrames: FrameData[] = [];
-                for(const imgData of loadedImages) {
-                    const img = await fabric.Image.fromURL(imgData.dataUrl);
-                    fabricTempCanvas.backgroundImage = img;
+        let firstWidth: number, firstHeight: number;
+        
+        const filePromises = imageFiles.map(file => new Promise<FrameData | null>((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    if (!firstWidth) {
+                        firstWidth = img.width;
+                        firstHeight = img.height;
+                        setGifInfo({ width: firstWidth, height: firstHeight });
+                    }
+                    const fabricTempCanvas = new fabric.Canvas(null as any);
+                    fabricTempCanvas.setWidth(img.width);
+                    fabricTempCanvas.setHeight(img.height);
+                    const fabImg = new fabric.Image(img);
+                    fabricTempCanvas.backgroundImage = fabImg;
                     fabricTempCanvas.renderAll();
                     const canvasState = JSON.stringify(fabricTempCanvas.toJSON());
-                    newFrames.push({
+
+                    resolve({
                         id: uuidv4(),
-                        thumbnail: imgData.dataUrl,
-                        delay: 200,
+                        thumbnail: e.target?.result as string,
+                        delay: 100,
                         canvasState,
                         history: [canvasState],
                         historyIndex: 0,
-                        width: imgData.width,
-                        height: imgData.height
+                        width: img.width,
+                        height: img.height,
                     });
-                }
-                setFrames(newFrames);
-                setGlobalDelay('200');
-            }
-        } catch (err) { setError(t('tools.gifCreator.errorProcessingImages')); } finally { setIsLoading(false); }
+                };
+                img.onerror = () => resolve(null);
+                img.src = e.target?.result as string;
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+        }));
+
+        Promise.all(filePromises).then(results => {
+            const newFrames = results.filter((f): f is FrameData => f !== null);
+            if(newFrames.length === 0) setError(t('tools.gifCreator.errorProcessingImages'));
+            setFrames(newFrames);
+            setIsLoading(false);
+        });
     }, [resetState, t]);
 
-    // --- CANVAS & EDITOR LOGIC ---
-    const deleteActiveObject = useCallback(() => {
-        const canvas = fabricCanvasRef.current;
-        const activeObj = canvas?.getActiveObject();
-        if (activeObj) {
-            canvas?.remove(activeObj);
-            canvas?.discardActiveObject();
-            canvas?.renderAll();
-            saveState();
-        }
-    }, [saveState]);
+    const handleGifUpload = (e: React.ChangeEvent<HTMLInputElement>) => e.target.files?.[0] && processGifFile(e.target.files[0]);
+    const handleImagesUpload = (e: React.ChangeEvent<HTMLInputElement>) => e.target.files && processImageFiles(e.target.files);
 
-    useEffect(() => {
-        const canvas = new fabric.Canvas(canvasRef.current, { selection: true });
-        fabricCanvasRef.current = canvas;
-
-        const updateActiveObject = () => {
-            const activeObj = canvas.getActiveObject();
-            setActiveObject(activeObj || null);
-            if (activeObj?.type === 'i-text') setActivePanel('text');
-        };
-
-        canvas.on('selection:created', updateActiveObject);
-        canvas.on('selection:updated', updateActiveObject);
-        canvas.on('selection:cleared', () => setActiveObject(null));
-        canvas.on('object:modified', saveState);
-
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if ((e.key === 'Delete' || e.key === 'Backspace') && canvas.getActiveObject()) {
-                deleteActiveObject();
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => { canvas.dispose(); window.removeEventListener('keydown', handleKeyDown); };
-    }, [deleteActiveObject, saveState]);
-
-    useEffect(() => {
-        const canvas = fabricCanvasRef.current;
-        if (!canvas) return; // canvas not ready
-
-        if (!selectedFrameId) {
-            // No frame selected, show placeholder
-            canvas.clear();
-            canvas.setWidth(500);
-            canvas.setHeight(500);
-            canvas.backgroundColor = '#e5e7eb';
-            canvas.renderAll();
-            setActiveObject(null);
-            return;
-        }
-
-        if (selectedFrame) {
-            // A frame is selected, load its state.
-            loadFrameState(selectedFrame);
-        }
-    }, [selectedFrameId, selectedFrame, loadFrameState]);
-
-    const handlePanelSelect = (panel: PanelType) => {
-        setActivePanel(p => p === panel ? null : panel);
-    };
-
-    const applyCrop = () => {
-      // Cropping logic is complex to merge in this context. For now, we will omit it.
-      // A full implementation would require re-rendering all objects onto a new, smaller canvas.
-    };
-    
-    const handleAddText = () => {
-        const canvas = fabricCanvasRef.current;
-        if (!canvas) return;
-        const text = new fabric.IText('Your Text', {
-            left: canvas.getWidth() / 2, top: canvas.getHeight() / 2,
-            fontFamily: 'Impact', fill: '#FFFFFF', fontSize: 50,
-            stroke: '#000000', strokeWidth: 2,
-            originX: 'center', originY: 'center', cornerColor: '#4F46E5',
-            cornerStyle: 'circle', transparentCorners: false,
-        });
-        canvas.add(text);
-        canvas.setActiveObject(text);
-        saveState();
-    };
-
-    const updateActiveTextObject = (prop: string, value: any) => {
-        if (activeTextObject) {
-            activeTextObject.set(prop as keyof fabric.IText, value);
-            fabricCanvasRef.current?.requestRenderAll();
-            debouncedSaveState();
-        }
-    };
-
-    // --- GIF GENERATION ---
-    const generateGif = async () => {
-        if (frames.length === 0) return;
+    const rebuildGif = useCallback(() => {
+        if (!frames.length || !gifInfo) return;
         setIsGenerating(true);
         setPreviewUrl(null);
 
-        let maxWidth = 0;
-        let maxHeight = 0;
-        frames.forEach(frame => {
-            if (frame.width > maxWidth) maxWidth = frame.width;
-            if (frame.height > maxHeight) maxHeight = frame.height;
+        const gif = new GIF({
+            workers: 2,
+            quality: parseInt(quality, 10),
+            width: gifInfo.width,
+            height: gifInfo.height,
+            workerScript: '/components/gif.worker.js'
         });
 
-        if (maxWidth === 0 || maxHeight === 0) {
-            maxWidth = gifInfo?.width || 500;
-            maxHeight = gifInfo?.height || 500;
-        }
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = gifInfo.width;
+        tempCanvas.height = gifInfo.height;
 
-        const gif = new GIF({ workers: 2, quality: parseInt(quality, 10), width: maxWidth, height: maxHeight, workerScript: 'components/gif.worker.js' });
-        
-        const targetCanvasEl = document.createElement('canvas');
-        targetCanvasEl.width = maxWidth;
-        targetCanvasEl.height = maxHeight;
-        const targetCtx = targetCanvasEl.getContext('2d');
-        if(!targetCtx) {
-            setIsGenerating(false);
-            return;
-        }
-
-        const tempCanvasEl = document.createElement('canvas');
-        const tempFabricCanvas = new fabric.Canvas(tempCanvasEl);
-        const loadImage = (src: string): Promise<HTMLImageElement> => new Promise((resolve, reject) => { const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = src; });
-
-        for (const frame of frames) {
-            await new Promise<void>(resolve => {
-                try {
-                    tempFabricCanvas.setWidth(frame.width);
-                    tempFabricCanvas.setHeight(frame.height);
-                    tempFabricCanvas.loadFromJSON(frame.canvasState, () => {
-                        tempFabricCanvas.renderAll();
-                        resolve();
-                    });
-                } catch(e) {
+        const addFrameToGif = async (frame: FrameData) => {
+            return new Promise<void>(resolve => {
+                const img = new Image();
+                img.onload = () => {
+                    tempCanvas.getContext('2d')?.clearRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    tempCanvas.getContext('2d')?.drawImage(img, 0, 0);
+                    gif.addFrame(tempCanvas, { copy: true, delay: frame.delay });
                     resolve();
-                }
+                };
+                const tempFabricCanvas = new fabric.Canvas(null);
+                tempFabricCanvas.loadFromJSON(frame.canvasState, () => {
+                    img.src = tempFabricCanvas.toDataURL();
+                    tempFabricCanvas.dispose();
+                });
             });
+        };
 
-            targetCtx.clearRect(0, 0, maxWidth, maxHeight);
-            const frameWidth = tempFabricCanvas.getWidth();
-            const frameHeight = tempFabricCanvas.getHeight();
-            const imgDataUrl = tempFabricCanvas.toDataURL({ format: 'png', multiplier: 1 });
-            const imgElement = await loadImage(imgDataUrl);
-            
-            const dx = (maxWidth - frameWidth) / 2;
-            const dy = (maxHeight - frameHeight) / 2;
-            targetCtx.drawImage(imgElement, dx, dy);
+        const processFrames = async () => {
+            for (const frame of frames) {
+                await addFrameToGif(frame);
+            }
+            gif.render();
+        };
 
-            gif.addFrame(targetCanvasEl, { copy: true, delay: frame.delay });
+        processFrames();
+
+        gif.on('finished', (blob: Blob) => {
+            const url = URL.createObjectURL(blob);
+            setPreviewUrl(url);
+            setIsGenerating(false);
+        });
+    }, [frames, gifInfo, quality]);
+
+    const downloadSelectedFrames = useCallback(() => {
+        const framesToDownload = frames.filter(f => selectedFrameIds.includes(f.id));
+        if (framesToDownload.length === 0) return;
+
+        const zip = new JSZip();
+        let processedCount = 0;
+
+        const tempCanvas = document.createElement('canvas');
+
+        framesToDownload.forEach(frame => {
+            const tempFabricCanvas = new fabric.Canvas(null);
+            tempFabricCanvas.loadFromJSON(frame.canvasState, () => {
+                tempCanvas.width = frame.width;
+                tempCanvas.height = frame.height;
+                const dataURL = tempFabricCanvas.toDataURL();
+                const img = new Image();
+                img.onload = () => {
+                    tempCanvas.getContext('2d')?.drawImage(img, 0, 0);
+                    tempCanvas.toBlob((blob: Blob | null) => {
+                        if (blob) {
+                            zip.file(`frame_${frame.id.substring(0, 8)}.png`, blob);
+                            processedCount++;
+                            if (processedCount === framesToDownload.length) {
+                                zip.generateAsync({ type: 'blob' }).then(content => {
+                                    const link = document.createElement('a');
+                                    link.href = URL.createObjectURL(content);
+                                    link.download = 'frames.zip';
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    URL.revokeObjectURL(link.href);
+                                });
+                            }
+                        }
+                    }, 'image/png');
+                };
+                img.src = dataURL;
+                tempFabricCanvas.dispose();
+            });
+        });
+    }, [frames, selectedFrameIds]);
+
+    const handleSelectAll = () => {
+        if (allSelected) {
+            setSelectedFrameIds([]);
+        } else {
+            setSelectedFrameIds(frames.map(f => f.id));
         }
-        
-        gif.on('finished', (blob: any) => { setPreviewUrl(URL.createObjectURL(blob)); setIsGenerating(false); });
-        gif.render();
     };
     
-    // --- EVENT HANDLERS ---
-    const handleGifFileChange = (e: React.ChangeEvent<HTMLInputElement>) => e.target.files?.[0] && processGifFile(e.target.files[0]);
-    const handleImagesFileChange = (e: React.ChangeEvent<HTMLInputElement>) => e.target.files && processImageFiles(e.target.files);
-    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); const files = e.dataTransfer.files; if (!files || files.length === 0) return; if (files.length === 1 && files[0].type === 'image/gif') { processGifFile(files[0]); } else { processImageFiles(files); } };
-    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => e.preventDefault();
-    const handleDelayChange = (id: string, delay: string) => setFrames(frames.map(f => f.id === id ? { ...f, delay: parseInt(delay, 10) || 0 } : f));
-    const handleApplyGlobalDelay = () => { const delay = parseInt(globalDelay, 10); if (!isNaN(delay)) { setFrames(frames.map(f => ({ ...f, delay }))); } };
-    const handleToggleSelect = (id: string) => setSelectedFrameIds(prev => prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]);
-    const handleSelectAll = () => allSelected ? setSelectedFrameIds([]) : setSelectedFrameIds(frames.map(f => f.id));
-    const handleDeleteSelected = () => {
-        setFrames(prev => prev.filter(f => !selectedFrameIds.includes(f.id)));
-        if (selectedFrameId && selectedFrameIds.includes(selectedFrameId)) setSelectedFrameId(null);
+    useEffect(() => {
+        const canvas = new fabric.Canvas(canvasRef.current, { selection: false, width: 300, height: 300 });
+        fabricCanvasRef.current = canvas;
+        return () => {
+            canvas.dispose();
+        };
+    }, []);
+
+    const deleteSelected = () => {
+        setFrames(frames.filter(f => !selectedFrameIds.includes(f.id)));
         setSelectedFrameIds([]);
-    };
-    const handleDownloadSelected = async () => {
-        if (selectedFrameIds.length === 0) return;
-        const zip = new JSZip();
-        for (const frameId of selectedFrameIds) {
-            const frame = frames.find(f => f.id === frameId);
-            if(frame) {
-                const base64Data = frame.thumbnail.split(',')[1];
-                zip.file(`frame_${frames.indexOf(frame) + 1}.png`, base64Data, { base64: true });
-            }
+        if (selectedFrameId && selectedFrameIds.includes(selectedFrameId)) {
+            setSelectedFrameId(null);
+            fabricCanvasRef.current?.clear();
         }
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(zipBlob);
-        link.download = 'frames.zip';
-        link.click();
-        URL.revokeObjectURL(link.href);
     };
+    
+    const applyDelayToAll = () => {
+        const delay = parseInt(globalDelay, 10);
+        if(isNaN(delay)) return;
+        setFrames(frames.map(f => ({ ...f, delay })));
+    };
+    
+    // Select the first frame when frames are loaded
+    useEffect(() => {
+        if (frames.length > 0 && !selectedFrameId) {
+            setSelectedFrameId(frames[0].id);
+        }
+    }, [frames, selectedFrameId]);
 
-    const toolbarItems = [
-        { id: 'resize', icon: ResizeIcon, label: t('tools.imageEditor.resize')},
-        { id: 'crop', icon: ScissorsIcon, label: t('tools.imageEditor.cropping')},
-        { id: 'transform', icon: RefreshIcon, label: t('tools.imageEditor.transform')},
-        { id: 'filters', icon: FiltersIcon, label: t('tools.imageEditor.filters')},
-        { id: 'adjustments', icon: SlidersIcon, label: t('tools.imageEditor.adjustments') },
-        { id: 'text', icon: TypeIcon, label: t('tools.imageEditor.text')},
-    ];
+    // Load frame state into editor canvas when selected frame changes
+    useEffect(() => {
+        if(selectedFrame) {
+            loadFrameState(selectedFrame);
+        }
+    }, [selectedFrame, loadFrameState]);
 
-    if (!frames.length) { /* Initial upload view */
-        return (
-            <div>
-                <ToolHeader title={t('tools.gifCreator.pageTitle')} description={t('tools.gifCreator.pageDescription')} />
-                {isLoading && <p className="text-center mt-6">{t('tools.gifCreator.loading')}</p>}
-                {error && <p className="text-center mt-6 text-red-500">{error}</p>}
-                <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-border-color dark:border-d-border-color rounded-lg h-60 bg-secondary dark:bg-d-secondary hover:border-accent dark:hover:border-d-accent transition-colors" onDrop={handleDrop} onDragOver={handleDragOver}>
-                    <input type="file" accept="image/gif" onChange={handleGifFileChange} className="hidden" ref={gifInputRef}/>
-                    <input type="file" accept="image/*" multiple onChange={handleImagesFileChange} className="hidden" ref={imagesInputRef} />
-                    <div className="text-center"><LayoutIcon className="mx-auto h-12 w-12 text-text-secondary dark:text-d-text-secondary" />
-                        <p className="mt-2 text-sm text-text-secondary dark:text-d-text-secondary max-w-md">{t('tools.gifCreator.initialMessage')}</p>
-                        <div className="flex gap-4 mt-4 justify-center">
-                            <button onClick={() => gifInputRef.current?.click()} className="px-4 py-2 bg-accent dark:bg-d-accent text-white dark:text-d-primary font-semibold rounded-lg hover:opacity-90 transition-opacity">{t('tools.gifCreator.uploadGifButton')}</button>
-                            <button onClick={() => imagesInputRef.current?.click()} className="px-4 py-2 bg-accent dark:bg-d-accent text-white dark:text-d-primary font-semibold rounded-lg hover:opacity-90 transition-opacity">{t('tools.gifCreator.uploadImagesButton')}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <div className="flex flex-col h-full">
+        <div>
             <ToolHeader title={t('tools.gifCreator.pageTitle')} description={t('tools.gifCreator.pageDescription')} />
-            <div className="flex-grow grid grid-cols-1 lg:grid-cols-[250px_1fr_320px] gap-4 min-h-0">
-                {/* Left Column: Frame List */}
-                <div className="flex flex-col bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color min-h-0">
-                    <div className="p-2 border-b border-border-color dark:border-d-border-color flex-shrink-0 space-y-2">
-                        <div className="flex items-center justify-between">
-                            <h3 className="font-semibold text-text-primary dark:text-d-text-primary">{t('tools.gifCreator.framesGrid')}</h3>
-                            <button onClick={handleSelectAll} className="px-2 py-1 text-xs font-medium bg-border-color dark:bg-d-border-color rounded-md">{allSelected ? t('tools.gifCreator.deselect_all') : t('tools.gifCreator.select_all')}</button>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <button onClick={handleDeleteSelected} disabled={selectedFrameIds.length === 0} className="w-full text-xs flex items-center justify-center gap-1 py-1 bg-primary dark:bg-d-primary rounded disabled:opacity-50"><TrashIcon className="w-3.5 h-3.5" />{t('tools.gifCreator.deleteSelected')}</button>
-                            <button onClick={handleDownloadSelected} disabled={selectedFrameIds.length === 0} className="w-full text-xs flex items-center justify-center gap-1 py-1 bg-primary dark:bg-d-primary rounded disabled:opacity-50"><DownloadIcon className="w-3.5 h-3.5" />{t('tools.gifCreator.download_selected')}</button>
-                        </div>
+            {error && <div className="p-4 mb-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md">{error}</div>}
+            
+            {frames.length === 0 && !isLoading ? (
+                <div className="text-center p-8 bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color">
+                    <p className="mb-4">{t('tools.gifCreator.initialMessage')}</p>
+                    <div className="flex justify-center gap-4">
+                        <button onClick={() => gifInputRef.current?.click()} className="px-6 py-2 bg-accent text-white rounded-md">{t('tools.gifCreator.uploadGifButton')}</button>
+                        <button onClick={() => imagesInputRef.current?.click()} className="px-6 py-2 bg-accent text-white rounded-md">{t('tools.gifCreator.uploadImagesButton')}</button>
+                        <input type="file" ref={gifInputRef} onChange={handleGifUpload} accept="image/gif" className="hidden" />
+                        <input type="file" ref={imagesInputRef} onChange={handleImagesUpload} accept="image/*" multiple className="hidden" />
                     </div>
-                    <div className="flex-grow p-2 space-y-2 overflow-y-auto min-h-0">
-                        {frames.map((frame, index) => (
-                            <div key={frame.id}>
-                                <div onClick={() => setSelectedFrameId(frame.id)} className={`group relative p-2 rounded-lg cursor-pointer ${selectedFrameId === frame.id ? 'bg-accent/10 dark:bg-d-accent/10 ring-2 ring-accent' : (selectedFrameIds.includes(frame.id) ? 'bg-blue-500/10' : 'bg-primary dark:bg-d-primary hover:bg-border-color/50')}`}>
-                                    <div className="flex items-center gap-3">
-                                        <input type="checkbox" checked={selectedFrameIds.includes(frame.id)} onChange={() => handleToggleSelect(frame.id)} onClick={e => e.stopPropagation()} className="form-checkbox h-4 w-4 rounded text-accent dark:text-d-accent bg-secondary dark:bg-d-secondary focus:ring-accent dark:focus:ring-d-accent"/>
-                                        <img src={frame.thumbnail} alt={`Frame ${index + 1}`} className="w-12 h-12 object-contain rounded-md border border-border-color dark:border-d-border-color bg-white dark:bg-black" />
-                                        <div className="flex-grow">
-                                            <p className="font-mono text-xs text-text-secondary dark:text-d-text-secondary">#{index + 1}</p>
-                                            <input type="number" value={frame.delay} onClick={(e) => e.stopPropagation()} onChange={(e) => handleDelayChange(frame.id, e.target.value)} className="w-full mt-1 bg-secondary dark:bg-d-secondary text-sm p-1 rounded border border-border-color dark:border-d-border-color focus:ring-1 focus:ring-accent" />
-                                        </div>
-                                    </div>
+                </div>
+            ) : isLoading ? (
+                <div className="text-center p-8">{t('tools.gifCreator.loading')}</div>
+            ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-6">
+                    {/* Main Content: Frames Grid & Editor */}
+                    <div className="flex flex-col gap-4">
+                        <div className="bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color p-4">
+                             <div className="flex justify-between items-center mb-2">
+                                <h3 className="font-semibold">{t('tools.gifCreator.framesGrid')}</h3>
+                                <div className="flex items-center gap-4 text-sm">
+                                    <span>{t('tools.gifCreator.frames_selected', { count: selectedFrameIds.length })}</span>
+                                    <button onClick={handleSelectAll} className="font-semibold">{allSelected ? t('tools.gifCreator.deselect_all') : t('tools.gifCreator.select_all')}</button>
+                                    <button onClick={deleteSelected} disabled={selectedFrameIds.length === 0} className="disabled:opacity-50"><TrashIcon/></button>
+                                    <button onClick={downloadSelectedFrames} disabled={selectedFrameIds.length === 0} className="disabled:opacity-50"><DownloadIcon/></button>
                                 </div>
                             </div>
-                        ))}
+                            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2 max-h-60 overflow-y-auto p-2 bg-primary dark:bg-d-primary rounded">
+                                {frames.map(frame => (
+                                    <div key={frame.id} className="relative aspect-square cursor-pointer" onClick={() => setSelectedFrameId(frame.id)}>
+                                        <img src={frame.thumbnail} alt={`Frame ${frame.id}`} className={`w-full h-full object-contain rounded border-2 ${selectedFrameId === frame.id ? 'border-accent' : 'border-transparent'}`} />
+                                        <input type="checkbox" checked={selectedFrameIds.includes(frame.id)} onChange={() => setSelectedFrameIds(ids => ids.includes(frame.id) ? ids.filter(id => id !== frame.id) : [...ids, frame.id])} className="absolute top-1 left-1" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color flex-grow p-4 flex items-center justify-center">
+                            <canvas ref={canvasRef} />
+                        </div>
                     </div>
-                </div>
 
-                {/* Center Column: Editor */}
-                 <div className="flex-grow flex items-center justify-center p-4 bg-primary dark:bg-d-primary relative overflow-auto group rounded-lg border border-border-color dark:border-d-border-color">
-                    <canvas ref={canvasRef} />
-                </div>
-
-                {/* Right Column: Controls */}
-                <div className="flex flex-col bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color">
-                   <div className="flex items-center gap-2 p-2 border-b border-border-color dark:border-d-border-color">
-                        <button onClick={handleUndo} disabled={!selectedFrame || selectedFrame.historyIndex <= 0} title={t('tools.imageEditor.undo')} className="p-2 text-text-secondary dark:text-d-text-secondary rounded-lg hover:bg-primary dark:hover:bg-d-primary disabled:opacity-30"><UndoIcon/></button>
-                        <button onClick={handleRedo} disabled={!selectedFrame || selectedFrame.historyIndex >= selectedFrame.history.length - 1} title={t('tools.imageEditor.redo')} className="p-2 text-text-secondary dark:text-d-text-secondary rounded-lg hover:bg-primary dark:hover:bg-d-primary disabled:opacity-30"><RedoIcon/></button>
-                   </div>
-                   <div className="flex-grow min-h-0 overflow-y-auto">
-                        {activeTextObject ? (
-                             <PropertiesPanel title={t('tools.imageEditor.text')}>
-                                 <LabeledControl label={t('tools.imageEditor.fontFamily')}>
-                                    <select value={activeTextObject.fontFamily} onChange={e => updateActiveTextObject('fontFamily', e.target.value)} className="w-full p-2 bg-primary dark:bg-d-primary rounded">
-                                         <option>Impact</option><option>Arial</option><option>Helvetica</option>
-                                     </select>
-                                 </LabeledControl>
-                                 <div className="grid grid-cols-2 gap-2">
-                                     <LabeledControl label={t('tools.imageEditor.color')}><input type="color" value={activeTextObject.fill as string} onChange={e => updateActiveTextObject('fill', e.target.value)} className="w-full h-8 p-0" /></LabeledControl>
-                                     <LabeledControl label={t('tools.imageEditor.fontSize')}><input type="number" value={activeTextObject.fontSize} onChange={e => updateActiveTextObject('fontSize', parseInt(e.target.value, 10))} className="w-full p-1 bg-primary dark:bg-d-primary rounded"/></LabeledControl>
+                    {/* Right Panel: Controls */}
+                    <div className="bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color p-4 space-y-4">
+                        <h3 className="text-lg font-bold">{t('tools.gifCreator.controlPanelTitle')}</h3>
+                         <div>
+                            {gifInfo && <p>{t('tools.gifCreator.dimensions')}: {gifInfo.width}x{gifInfo.height}</p>}
+                            <p>{t('tools.gifCreator.frameCount')}: {frames.length}</p>
+                         </div>
+                         <Accordion title={t('tools.gifCreator.timingSettings')}>
+                            <LabeledControl label={t('tools.gifCreator.delay_ms')}>
+                                <input type="number" value={globalDelay} onChange={e => setGlobalDelay(e.target.value)} className="w-full p-2 bg-primary dark:bg-d-primary rounded" />
+                            </LabeledControl>
+                            <button onClick={applyDelayToAll} className="w-full py-2 text-sm bg-border-color dark:bg-d-border-color rounded">{t('tools.gifCreator.apply_to_all')}</button>
+                         </Accordion>
+                         <Accordion title={t('tools.gifCreator.rebuild_gif')} defaultOpen>
+                            <LabeledControl label={t('tools.gifCreator.qualityLabel')}>
+                                <select value={quality} onChange={e => setQuality(e.target.value)} className="w-full p-2 bg-primary dark:bg-d-primary rounded">
+                                    <option value="1">{t('tools.gifCreator.qualityHigh')}</option>
+                                    <option value="10">{t('tools.gifCreator.qualityMedium')}</option>
+                                    <option value="30">{t('tools.gifCreator.qualityLow')}</option>
+                                </select>
+                            </LabeledControl>
+                            <button onClick={rebuildGif} disabled={isGenerating} className="w-full py-2 bg-accent text-white rounded disabled:opacity-50">
+                                {isGenerating ? t('tools.gifCreator.generating_gif') : t('tools.gifCreator.generate_preview')}
+                            </button>
+                             {previewUrl && (
+                                 <div className="space-y-2">
+                                    <img src={previewUrl} alt="GIF Preview" className="w-full rounded border border-border-color dark:border-d-border-color"/>
+                                    <a href={previewUrl} download="new.gif" className="block w-full text-center py-2 bg-green-600 text-white rounded">{t('tools.gifCreator.download_gif')}</a>
                                  </div>
-                                 <button onClick={deleteActiveObject} className="w-full text-sm text-red-500 flex items-center justify-center gap-2 py-1 hover:bg-red-500/10 rounded"><TrashIcon className="w-4 h-4" /> {t('tools.imageEditor.deleteLayer')}</button>
-                             </PropertiesPanel>
-                        ) : (
-                             <PropertiesPanel title={t('common.settings')}>
-                                <button onClick={handleAddText} className="w-full text-sm flex items-center justify-center gap-2 py-2 bg-primary dark:bg-d-primary rounded-lg hover:bg-border-color dark:hover:bg-d-border-color"><TypeIcon/> {t('tools.imageEditor.addText')}</button>
-                                <Accordion title={t('tools.gifCreator.timingSettings')} defaultOpen>
-                                    <LabeledControl label={t('tools.gifCreator.delay_ms')}>
-                                        <div className="flex items-center gap-2">
-                                            <input type="number" value={globalDelay} onChange={(e) => setGlobalDelay(e.target.value)} className="w-full p-2 bg-primary dark:bg-d-primary rounded"/>
-                                            <button onClick={handleApplyGlobalDelay} className="px-3 py-2 text-sm bg-border-color dark:bg-d-border-color rounded whitespace-nowrap">{t('tools.gifCreator.apply_to_all')}</button>
-                                        </div>
-                                    </LabeledControl>
-                                </Accordion>
-                                <Accordion title={t('tools.gifCreator.rebuild_gif')} defaultOpen>
-                                    <LabeledControl label={t('tools.gifCreator.qualityLabel')}>
-                                        <select value={quality} onChange={(e) => setQuality(e.target.value)} className="w-full p-2 bg-primary dark:bg-d-primary rounded">
-                                            <option value="1">{t('tools.gifCreator.qualityHigh')}</option>
-                                            <option value="10">{t('tools.gifCreator.qualityMedium')}</option>
-                                            <option value="30">{t('tools.gifCreator.qualityLow')}</option>
-                                        </select>
-                                    </LabeledControl>
-                                    <button onClick={generateGif} disabled={isGenerating} className="w-full mt-2 px-4 py-2 text-sm bg-accent text-white rounded-md hover:opacity-90 disabled:opacity-50">
-                                        {isGenerating ? t('tools.gifCreator.generating_gif') : t('tools.gifCreator.generate_preview')}
-                                    </button>
-                                    {previewUrl && <>
-                                        <img src={previewUrl} alt="Preview" className="w-full rounded-md border mt-2" />
-                                        <a href={previewUrl} download="edited.gif" className="w-full text-center block mt-2 px-4 py-2 text-sm bg-green-600 text-white rounded-md hover:bg-green-700">{t('tools.gifCreator.download_gif')}</a>
-                                    </>}
-                                </Accordion>
-                            </PropertiesPanel>
-                        )}
-                   </div>
-                   <div className="p-4 border-t border-border-color dark:border-d-border-color">
-                        <button onClick={resetState} className="w-full text-sm py-2 bg-border-color dark:bg-d-border-color rounded">{t('tools.gifCreator.resetEditor')}</button>
+                             )}
+                         </Accordion>
+                          <button onClick={resetState} className="w-full py-2 bg-border-color dark:bg-d-border-color rounded">{t('tools.gifCreator.resetEditor')}</button>
                     </div>
                 </div>
-            </div>
+            )}
         </div>
     );
 };

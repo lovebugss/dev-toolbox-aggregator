@@ -54,6 +54,14 @@ import SvgShapeGenerator from './tools/SvgShapeGenerator';
 import JsonToJavaBean from './tools/JsonToJavaBean';
 import StreamBroadcaster from './tools/StreamBroadcaster';
 import CommitMessageGenerator from './tools/CommitMessageGenerator';
+import ExcelToJson from './tools/ExcelToJson';
+import DicomViewer from './tools/DicomViewer';
+import PdfToPng from './tools/PdfToPng';
+import LongImageStitcher from './tools/LongImageStitcher';
+import PdfSplitter from './tools/PdfSplitter';
+import PdfMerger from './tools/PdfMerger';
+import PdfWatermark from './tools/PdfWatermark';
+import PdfCompressor from './tools/PdfCompressor';
 
 export const FullScreenContext = createContext<{
     isFullScreen: boolean;
@@ -85,6 +93,7 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'uuid-generator': UuidGenerator,
   'diff-checker': DiffChecker,
   'data-converter': DataConverter,
+  'dicom-viewer': DicomViewer,
   'timestamp-converter': TimestampConverter,
   'calculator': Calculator,
   'video-to-gif': VideoToGif,
@@ -118,6 +127,13 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'json-to-java-bean': JsonToJavaBean,
   'stream-broadcaster': StreamBroadcaster,
   'commit-message-generator': CommitMessageGenerator,
+  'excel-to-json': ExcelToJson,
+  'pdf-to-png': PdfToPng,
+  'long-image-stitcher': LongImageStitcher,
+  'pdf-splitter': PdfSplitter,
+  'pdf-merger': PdfMerger,
+  'pdf-watermark': PdfWatermark,
+  'pdf-compressor': PdfCompressor,
 };
 
 const useMediaQuery = (query: string) => {

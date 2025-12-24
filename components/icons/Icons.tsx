@@ -1,18 +1,19 @@
 import React from 'react';
 import {
-  BsTools, BsBraces, BsFileText, BsQrCode, BsCalculator, BsMailbox, BsGrid3X3Gap, BsGripVertical, BsTextareaT, BsSquare, BsCircle, BsTriangle, BsHeart
+  BsTools, BsBraces, BsFileText, BsQrCode, BsCalculator, BsMailbox, BsGrid3X3Gap, BsGripVertical, BsTextareaT, BsSquare, BsCircle, BsTriangle, BsHeart, BsTable, BsFileEarmarkMedical
 } from 'react-icons/bs';
 import {
-  FiGlobe, FiSun, FiMoon, FiSearch, FiStar, FiChevronsLeft, FiCheckCircle, FiCode, FiInfo, FiAlertTriangle, FiX, FiAperture, FiImage, FiFilm, FiLock, FiClock, FiHash, FiDatabase, FiScissors, FiPhone, FiSmile, FiKey, FiEdit, FiLink, FiZap, FiRefreshCw, FiTarget, FiEye, FiCpu, FiCrop, FiSliders, FiType, FiDownload, FiTrash2, FiCornerUpLeft, FiCornerUpRight, FiMaximize, FiLayout, FiLayers, FiChevronUp, FiChevronDown, FiChevronsUp, FiChevronsDown, FiUnlock, FiCopy, FiBarChart2, FiArrowRight, FiPlay, FiPause, FiSkipBack, FiSkipForward, FiMenu
+  FiGlobe, FiSun, FiMoon, FiSearch, FiStar, FiChevronsLeft, FiCheckCircle, FiCode, FiInfo, FiAlertTriangle, FiX, FiAperture, FiImage, FiFilm, FiLock, FiClock, FiHash, FiDatabase, FiScissors, FiPhone, FiSmile, FiKey, FiEdit, FiLink, FiZap, FiRefreshCw, FiTarget, FiEye, FiCpu, FiCrop, FiSliders, FiType, FiDownload, FiTrash2, FiCornerUpLeft, FiCornerUpRight, FiMaximize, FiLayout, FiLayers, FiChevronUp, FiChevronDown, FiChevronsUp, FiChevronsDown, FiUnlock, FiCopy, FiBarChart2, FiArrowRight, FiPlay, FiPause, FiSkipBack, FiSkipForward, FiMenu, FiMinimize
 } from 'react-icons/fi';
 // Fix: Replaced BsShapes with IoShapesOutline from react-icons/io5 to fix import error.
 import { IoColorPaletteOutline, IoShapesOutline } from 'react-icons/io5';
 import { GoGitCompare } from 'react-icons/go';
 import { VscRegex, VscFiles, VscSourceControl, VscDebugAlt, VscExtensions, VscSettingsGear, VscChevronRight, VscChevronDown, VscRemote, VscSync, VscError, VscWarning, VscSearch, VscFolder, VscFile, VscMarkdown, VscChromeMaximize, VscChromeRestore, VscScreenFull, VscScreenNormal, VscBroadcast } from 'react-icons/vsc';
-import { TbId as TbUuid, TbHandStop, TbMessage2, TbFish, TbPlugConnected } from 'react-icons/tb';
+// FIX: Replaced TbCompress with a suitable alternative as it is not exported.
+import { TbId as TbUuid, TbHandStop, TbMessage2, TbFish, TbPlugConnected, TbDroplet } from 'react-icons/tb';
 // Fix: Replaced GrCpp with SiCplusplus for C++ icon.
 import { SiVuedotjs, SiCplusplus } from 'react-icons/si';
-import { FaJava } from 'react-icons/fa';
+import { FaJava, FaFilePdf } from 'react-icons/fa';
 
 type IconProps = React.SVGProps<SVGSVGElement> & { filled?: boolean; size?: string | number };
 
@@ -109,6 +110,12 @@ export const TriangleIcon = createIcon(BsTriangle);
 export const HeartIcon = createIcon(BsHeart);
 export const MenuIcon = createIcon(FiMenu, 'h-6 w-6');
 export const BroadcastIcon = createIcon(VscBroadcast);
+export const PdfFileIcon = createIcon(FaFilePdf);
+export const WaterDropIcon = createIcon(TbDroplet);
+// FIX: Replaced TbCompress with FiMinimize.
+export const CompressIcon = createIcon(FiMinimize);
+export const TableIcon = createIcon(BsTable);
+export const DicomFileIcon = createIcon(BsFileEarmarkMedical);
 
 
 // Icons for Coding Slacker

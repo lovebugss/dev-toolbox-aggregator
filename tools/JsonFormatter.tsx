@@ -11,10 +11,28 @@ interface JsonFormatterState {
   inputJson: string;
   parsedJson: any | null;
   error: string | null;
+  filterNullValues: boolean;
 }
 type CollapsedPaths = Record<string, boolean>;
 
 // --- HELPER & UI COMPONENTS ---
+
+const removeNulls = (obj: any): any => {
+    if (Array.isArray(obj)) {
+        return obj
+            .filter(v => v !== null)
+            .map(v => removeNulls(v));
+    }
+    if (obj !== null && typeof obj === 'object') {
+        return Object.entries(obj).reduce((acc: {[key: string]: any}, [key, value]) => {
+            if (value !== null) {
+                acc[key] = removeNulls(value);
+            }
+            return acc;
+        }, {});
+    }
+    return obj;
+};
 
 const CopyButton: React.FC<{ onCopy: () => void }> = ({ onCopy }) => (
     <button
@@ -127,8 +145,9 @@ const JsonFormatter: React.FC = () => {
         inputJson: '{\n  "name": "DevToolbox",\n  "version": 1.0,\n  "tools": [\n    {\n      "id": "json-formatter",\n      "name": "JSON Formatter"\n    }\n  ],\n  "active": true,\n  "config": null\n}',
         parsedJson: null,
         error: null,
+        filterNullValues: false,
     });
-    const { inputJson, parsedJson, error } = state;
+    const { inputJson, parsedJson, error, filterNullValues } = state;
     const addToast = useToasts();
     
     const [collapsedPaths, setCollapsedPaths] = useState<CollapsedPaths>({});
@@ -140,13 +159,16 @@ const JsonFormatter: React.FC = () => {
             return;
         }
         try {
-            const parsed = JSON.parse(jsonString);
+            let parsed = JSON.parse(jsonString);
+            if (filterNullValues) {
+                parsed = removeNulls(parsed);
+            }
             setState(s => ({ ...s, parsedJson: parsed, error: null }));
             setCollapsedPaths({});
         } catch (e: any) {
             setState(s => ({ ...s, parsedJson: null, error: t('tools.jsonFormatter.errorInvalid', { message: e.message }) }));
         }
-    }, [setState, t]);
+    }, [setState, t, filterNullValues]);
     
     useEffect(() => {
         if (debounceTimeoutRef.current) {
@@ -165,7 +187,7 @@ const JsonFormatter: React.FC = () => {
 
 
     const handleFormat = () => parseJson(inputJson);
-    const handleClear = () => setState({ inputJson: '', parsedJson: null, error: null });
+    const handleClear = () => setState({ inputJson: '', parsedJson: null, error: null, filterNullValues: state.filterNullValues });
 
     const toggleCollapse = (path: string) => {
         setCollapsedPaths(prev => ({ ...prev, [path]: !prev[path] }));
@@ -200,9 +222,20 @@ const JsonFormatter: React.FC = () => {
                 <div className="flex flex-col bg-secondary dark:bg-d-secondary rounded-lg border border-border-color dark:border-d-border-color min-h-[300px] h-full">
                      <div className="flex items-center justify-between p-2 border-b border-border-color dark:border-d-border-color">
                          <h3 id="json-input-label" className="font-semibold px-2 text-text-secondary dark:text-d-text-secondary">{t('tools.jsonFormatter.inputLabel')}</h3>
-                         <div className="flex items-center gap-2">
-                             <button onClick={handleFormat} className="px-3 py-1 text-xs font-medium bg-border-color dark:bg-d-border-color rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" aria-label={t('common.tooltips.formatJson')}>{t('tools.jsonFormatter.formatButton')}</button>
-                            <button onClick={handleClear} className="px-3 py-1 text-xs font-medium bg-border-color dark:bg-d-border-color rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" aria-label={t('common.tooltips.clearJson')}>{t('tools.jsonFormatter.clearButton')}</button>
+                         <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 text-xs font-medium text-text-secondary dark:text-d-text-secondary cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={filterNullValues}
+                                    onChange={(e) => setState(s => ({...s, filterNullValues: e.target.checked}))}
+                                    className="w-4 h-4 rounded text-accent dark:text-d-accent bg-primary dark:bg-d-primary border-border-color dark:border-d-border-color focus:ring-accent dark:focus:ring-d-accent"
+                                />
+                                {t('tools.jsonFormatter.filterNulls')}
+                            </label>
+                             <div className="flex items-center gap-2">
+                                 <button onClick={handleFormat} className="px-3 py-1 text-xs font-medium bg-border-color dark:bg-d-border-color rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" aria-label={t('common.tooltips.formatJson')}>{t('tools.jsonFormatter.formatButton')}</button>
+                                <button onClick={handleClear} className="px-3 py-1 text-xs font-medium bg-border-color dark:bg-d-border-color rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" aria-label={t('common.tooltips.clearJson')}>{t('tools.jsonFormatter.clearButton')}</button>
+                             </div>
                          </div>
                      </div>
                      <div className="flex-grow flex p-2 min-h-0 overflow-auto">

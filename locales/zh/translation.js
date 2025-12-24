@@ -20,6 +20,7 @@ export default {
       "web": "网络",
       "text": "文本",
       "imageVideo": "图像与视频",
+      "pdf": "PDF",
       "creative": "创意",
       "math": "数学",
       "convenience": "便捷",
@@ -31,10 +32,60 @@ export default {
   "welcome": {
     "title": "欢迎使用开发者工具箱",
     "subtitle": "为开发者和爱好者收集的实用工具。从侧边栏选择一个工具开始使用吧。",
+    "advantages": {
+      "title": "我们的核心优势",
+      "inBrowser": {
+        "title": "纯浏览器处理",
+        "description": "所有工具直接在您的浏览器中运行。您的数据在本地处理，确保速度和效率，绝不上传至服务器。"
+      },
+      "secure": {
+        "title": "安全透明",
+        "description": "我们的代码公开透明，不含任何后门或隐藏追踪。所见即所得，为您提供一个可靠、安全的工具集。"
+      },
+      "private": {
+        "title": "隐私至上",
+        "description": "我们尊重您的隐私。您的任何数据或文件都不会被上传到我们的服务器。一切操作始终在您的本地设备上完成。"
+      }
+    },
     "totalTools": "累计收录工具",
     "servedCount": "共帮助人次"
   },
   "tools": {
+    "excelToJson": {
+        "name": "Excel 转 JSON",
+        "description": "将 Excel 文件（.xlsx, .xls）转换为 JSON 数据。",
+        "pageTitle": "Excel 转 JSON 转换器",
+        "pageDescription": "上传一个 Excel 文件，将其中的工作表转换为 JSON 格式。",
+        "uploadFile": "上传 Excel 文件",
+        "dropzone": "或拖放到此处",
+        "sheets": "工作表",
+        "output": "JSON 输出",
+        "noSheets": "文件中未找到工作表。",
+        "selectSheet": "选择一个工作表以查看其数据。",
+        "errorReading": "读取文件时出错。",
+        "errorParsing": "解析 Excel 文件时出错。"
+    },
+    "dicomViewer": {
+        "name": "DICOM 查看器",
+        "description": "在线查看和分析 DICOM 医学影像文件。",
+        "pageTitle": "DICOM 文件查看器",
+        "pageDescription": "上传一个 .dcm 文件以查看图像及其元数据。所有处理都在您的浏览器本地完成。",
+        "uploadButton": "选择 DICOM 文件",
+        "dropzone": "或拖放到此处",
+        "processing": "正在处理 DICOM 文件...",
+        "tags": "DICOM 标签",
+        "patientName": "患者姓名",
+        "patientID": "患者 ID",
+        "studyDate": "检查日期",
+        "studyDescription": "检查描述",
+        "modality": "模态",
+        "seriesDescription": "序列描述",
+        "imageControls": "图像控制",
+        "windowCenter": "窗位",
+        "windowWidth": "窗宽",
+        "reset": "重置视图",
+        "noImage": "无图像可显示"
+    },
     "commitMessageGenerator": {
       "name": "Commit 信息生成器",
       "description": "使用 AI 从您的更改描述中生成规范的 Commit 信息。",
@@ -55,6 +106,7 @@ export default {
       "outputLabel": "格式化输出",
       "formatButton": "格式化",
       "clearButton": "清空",
+      "filterNulls": "过滤null值",
       "placeholder": "在此处粘贴您的 JSON...",
       "outputPlaceholder": "格式化的 JSON 将出现在这里。",
       "errorInvalid": "无效的 JSON: {{message}}"
@@ -157,6 +209,45 @@ export default {
       "generate_preview": "生成预览",
       "download_gif": "下载 GIF",
       "resetEditor": "重置"
+    },
+    "pdfToPng": {
+      "name": "PDF 转 PNG",
+      "description": "将 PDF 文件的每一页转换为 PNG 图像。",
+      "pageTitle": "PDF 转 PNG 转换器",
+      "pageDescription": "上传 PDF 文件，将其所有页面转换为高质量的 PNG 图像。所有处理都在您的浏览器中完成。",
+      "uploadButton": "选择 PDF",
+      "dropzone": "或将 PDF 文件拖放到此处。",
+      "fileTypes": "仅限 PDF 文件",
+      "processing": "正在处理 PDF...",
+      "renderingPage": "正在渲染第 {{currentPage}} 页，共 {{totalPages}} 页",
+      "output": "生成的图像",
+      "downloadButton": "下载第 {{pageNumber}} 页",
+      "downloadAllButton": "全部下载 (ZIP)",
+      "outputPlaceholder": "转换后的 PNG 图像将显示在此处。",
+      "reset": "处理另一个 PDF"
+    },
+    "longImageStitcher": {
+      "name": "长图拼接",
+      "description": "将多张图片纵向或横向拼接成一张长图。",
+      "pageTitle": "长图拼接工具",
+      "pageDescription": "上传您的图片，根据需要重新排序，然后将它们合并成一张长图。",
+      "uploadButton": "选择图片",
+      "dropzone": "或将图片拖放到此处。",
+      "uploadedImages": "已上传图片",
+      "dragToReorder": "拖动以排序",
+      "clearAll": "全部清除",
+      "options": "选项",
+      "direction": "拼接方向",
+      "vertical": "纵向",
+      "horizontal": "横向",
+      "quality": "图片质量",
+      "format": "输出格式",
+      "generate": "开始拼接",
+      "generating": "拼接中...",
+      "output": "拼接结果",
+      "download": "下载图片",
+      "outputPlaceholder": "您拼接的图片将显示在此处。",
+      "errorProcessing": "处理一张或多张图片时发生错误。"
     },
     "textDiff": {
       "name": "文本差异比对",
@@ -481,10 +572,8 @@ export default {
       "uppercase": "大写"
     },
     "md5Hasher": {
-      "name": "MD5 哈希生成器",
-      "description": "计算给定文本字符串的 MD5 哈希值。",
-      "pageTitle": "MD5 哈希生成器",
-      "pageDescription": "从您的文本输入生成 MD5 哈希。MD5 是一种广泛使用的加密哈希函数，产生一个128位的哈希值。",
+      "name": "MD5 哈希生成器", "description": "计算给定文本字符串的 MD5 哈希值。",
+      "pageTitle": "MD5 哈希生成器", "pageDescription": "从您的文本输入生成 MD5 哈希。MD5 是一种广泛使用的加密哈希函数，产生一个128位的哈希值。",
       "inputLabel": "输入文本",
       "outputLabel": "MD5 哈希输出",
       "placeholder": "在此输入或粘贴文本",
@@ -681,6 +770,70 @@ export default {
       "preview": "实时预览",
       "permissionsNeeded": "需要摄像头和麦克风权限才能开始直播。",
       "allowPermissions": "允许权限"
+    },
+    "pdfSplitter": {
+      "name": "PDF 拆分",
+      "description": "从 PDF 中提取页面到多个文档。",
+      "pageTitle": "PDF 拆分器",
+      "pageDescription": "上传 PDF 以将其拆分为单个页面或提取特定页面范围。",
+      "extractAll": "提取所有页面",
+      "extractRange": "提取指定页面",
+      "rangePlaceholder": "例如：1, 3-5, 8",
+      "splitButton": "拆分 PDF",
+      "downloadZip": "全部下载 (ZIP)",
+      "downloadPdf": "下载 PDF"
+    },
+    "pdfMerger": {
+      "name": "PDF 合并",
+      "description": "将多个 PDF 文件合并为一个文档。",
+      "pageTitle": "PDF 合并器",
+      "pageDescription": "上传多个 PDF 文件，根据需要重新排序，然后将它们合并成一个。",
+      "uploadedPdfs": "已上传的 PDF",
+      "mergeButton": "合并 PDF",
+      "page_count": "{{count}} 页",
+      "page_count_plural": "{{count}} 页"
+    },
+    "pdfWatermark": {
+      "name": "PDF 水印",
+      "description": "为您的 PDF 文件添加文本或图片水印。",
+      "pageTitle": "PDF 水印工具",
+      "pageDescription": "为您的 PDF 文档的每一页应用自定义文本或图片水印。",
+      "watermarkType": "水印类型",
+      "text": "文本",
+      "image": "图片",
+      "textOptions": "文本选项",
+      "imageOptions": "图片选项",
+      "watermarkText": "水印文本",
+      "font": "字体",
+      "fontSize": "字号",
+      "color": "颜色",
+      "uploadImage": "上传水印图片",
+      "commonOptions": "通用选项",
+      "opacity": "不透明度",
+      "rotation": "旋转角度",
+      "position": "位置",
+      "tiled": "平铺",
+      "center": "中心",
+      "topLeft": "左上角",
+      "topRight": "右上角",
+      "bottomLeft": "左下角",
+      "bottomRight": "右下角",
+      "applyWatermark": "应用水印"
+    },
+    "pdfCompressor": {
+      "name": "PDF 压缩",
+      "description": "减小 PDF 文件的文件大小。",
+      "pageTitle": "PDF 压缩器",
+      "pageDescription": "上传 PDF 以通过优化图像和内部结构来减小其文件大小。",
+      "compressionLevel": "压缩级别",
+      "level_low": "低 (最佳质量)",
+      "level_medium": "中 (均衡)",
+      "level_high": "高 (最小体积)",
+      "originalSize": "原始大小",
+      "compressedSize": "压缩后大小",
+      "reduction": "压缩率",
+      "compressButton": "压缩 PDF",
+      "download": "下载压缩后的 PDF"
     }
   },
   "common": {

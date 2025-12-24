@@ -55,7 +55,8 @@ ${userInput}`;
         navigator.clipboard.writeText(generatedMessage).then(() => {
             addToast(t('common.toast.copiedSuccess'), 'success');
         }, () => {
-            addToast(t('common.tost.copiedFailed'), 'error');
+            // FIX: Corrected translation key for copy failed message.
+            addToast(t('common.toast.copiedFailed'), 'error');
         });
     };
 

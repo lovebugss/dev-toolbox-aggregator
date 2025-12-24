@@ -213,7 +213,7 @@ const ImageCollage: React.FC = () => {
         const gridWidth = totalWidth - outerBorder * 2;
         const gridHeight = totalHeight - outerBorder * 2;
 
-        const imagePromises = Object.entries(placedImages).map(([indexStr, placedImage]) => {
+        const imagePromises = (Object.entries(placedImages) as [string, PlacedImage][]).map(([indexStr, placedImage]) => {
             const index = parseInt(indexStr);
             const cell = activeLayout.cells[index];
             if (!cell) return Promise.resolve(null);
@@ -325,7 +325,21 @@ const ImageCollage: React.FC = () => {
                 const { width: cellWidth, height: cellHeight, left: cellLeft, top: cellTop } = clipPath;
                 const offsetX = (img.left! - cellLeft!) / cellWidth!;
                 const offsetY = (img.top! - cellTop!) / cellHeight!;
-                setPlacedImages(prev => ({ ...prev, [(img as any).cellIndex]: { ...prev[(img as any).cellIndex], offsetX, offsetY } }));
+                setPlacedImages(prev => {
+                    const cellIndex = (img as any).cellIndex;
+                    const existingData = prev[cellIndex];
+                    if (existingData) {
+                        return {
+                            ...prev,
+                            [cellIndex]: {
+                                ...existingData,
+                                offsetX,
+                                offsetY,
+                            },
+                        };
+                    }
+                    return prev;
+                });
             }
             updateLayers();
         };
@@ -402,9 +416,13 @@ const ImageCollage: React.FC = () => {
 
         if (currentFileRef) {
             const { cellIndex } = currentFileRef; // Destructure before async
-            const reader = new FileReader();
-            reader.onload = (event) => setPlacedImages(prev => ({ ...prev, [cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-            reader.readAsDataURL(files[0]);
+            // FIX: Explicitly cast files[0] as File and then as Blob to satisfy readAsDataURL which expects a Blob.
+            const file = (files as FileList)[0] as File;
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => setPlacedImages(prev => ({ ...prev, [cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
+                reader.readAsDataURL(file as Blob);
+            }
         } else {
             const canvas = fabricCanvasRef.current;
             if(!canvas) return;
@@ -412,7 +430,8 @@ const ImageCollage: React.FC = () => {
             
             let newImages = {...placedImages};
             let filesAdded = 0;
-            Array.from(files).slice(0, availableSlots.length).forEach((file, i) => {
+            // FIX: Explicitly cast Array.from result to File[] to avoid 'unknown' type errors during iteration.
+            (Array.from(files as FileList) as File[]).slice(0, availableSlots.length).forEach((file, i) => {
                 const reader = new FileReader();
                 reader.onload = (event) => {
                     newImages[availableSlots[i]] = { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 };
@@ -421,7 +440,8 @@ const ImageCollage: React.FC = () => {
                         setPlacedImages(newImages);
                     }
                 };
-                reader.readAsDataURL(file);
+                // FIX: Explicitly cast file to Blob for readAsDataURL.
+                reader.readAsDataURL(file as Blob);
             });
         }
         e.target.value = '';
@@ -568,7 +588,7 @@ const ImageCollage: React.FC = () => {
     return (
         <div>
             <ToolHeader title={t('tools.imageCollage.pageTitle')} description={t('tools.imageCollage.pageDescription')} />
-            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+            <input type="file" min-h-[65vh] max-h-[65vh] ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             
             <div className="bg-secondary dark:bg-d-secondary rounded-xl border border-border-color dark:border-d-border-color shadow-lg">
                 <div className="flex items-center gap-2 md:gap-4 p-2 border-b border-border-color dark:border-d-border-color">
@@ -750,7 +770,7 @@ const CanvasSettingsPanel: React.FC<{settings: any, setSettings: any, isRatioLoc
             reader.onload = (event) => {
                 setSettings((s: any) => ({...s, backgroundImage: event.target?.result as string, backgroundType: 'image'}));
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(file as Blob);
         }
         e.target.value = '';
     };
@@ -809,21 +829,38 @@ const CanvasSettingsPanel: React.FC<{settings: any, setSettings: any, isRatioLoc
     );
 };
 
-const ImageSettingsPanel: React.FC<{activeCellIndex: number, placedImages: any, setPlacedImages: any}> = ({ activeCellIndex, placedImages, setPlacedImages }) => {
+const ImageSettingsPanel: React.FC<{activeCellIndex: number, placedImages: Record<number, PlacedImage>, setPlacedImages: React.Dispatch<React.SetStateAction<Record<number, PlacedImage>>>}> = ({ activeCellIndex, placedImages, setPlacedImages }) => {
     const { t } = useTranslation();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const singleFileRef = useRef<{ cellIndex: number } | null>(null);
 
-    const updateActiveImageData = (data: Partial<PlacedImage>) => setPlacedImages((prev: any) => ({ ...prev, [activeCellIndex]: { ...prev[activeCellIndex], ...data } }));
-    const handleRemoveImage = () => { const newImages = {...placedImages}; delete newImages[activeCellIndex]; setPlacedImages(newImages); };
+    const updateActiveImageData = (data: Partial<PlacedImage>) => {
+        setPlacedImages((prev: Record<number, PlacedImage>) => {
+            const existing = prev[activeCellIndex];
+            if (!existing) return prev;
+            return {
+                ...prev,
+                [activeCellIndex]: { ...existing, ...data }
+            };
+        });
+    };
+    const handleRemoveImage = () => {
+        setPlacedImages((prev: Record<number, PlacedImage>) => {
+            const newImages = { ...prev };
+            delete newImages[activeCellIndex];
+            return newImages;
+        });
+    };
     const handleReplaceImage = () => { singleFileRef.current = { cellIndex: activeCellIndex }; fileInputRef.current?.click(); };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+        const files = e.target.files;
+        const file = files ? (files as FileList)[0] as File : null;
         if (file && singleFileRef.current) {
             const reader = new FileReader();
-            reader.onload = (event) => setPlacedImages((prev: any) => ({ ...prev, [singleFileRef.current!.cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-            reader.readAsDataURL(file);
+            reader.onload = (event) => setPlacedImages((prev: Record<number, PlacedImage>) => ({ ...prev, [singleFileRef.current!.cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
+            // FIX: Explicitly cast file to Blob for readAsDataURL.
+            reader.readAsDataURL(file as Blob);
         }
         e.target.value = ''; singleFileRef.current = null;
     };
@@ -832,7 +869,7 @@ const ImageSettingsPanel: React.FC<{activeCellIndex: number, placedImages: any, 
         <PropertiesPanel title={t('tools.imageCollage.imageSettings')}>
             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             <div className="space-y-4">
-                <LabeledControl label={t('tools.imageCollage.zoom')} valueDisplay={`${Math.round(placedImages[activeCellIndex]?.zoom * 100)}%`}>
+                <LabeledControl label={t('tools.imageCollage.zoom')} valueDisplay={`${Math.round((placedImages[activeCellIndex]?.zoom || 0) * 100)}%`}>
                     <input type="range" min="0.5" max="3" step="0.01" value={placedImages[activeCellIndex]?.zoom || 1} onChange={e => updateActiveImageData({ zoom: parseFloat(e.target.value)})} className="w-full accent-accent dark:accent-d-accent" />
                 </LabeledControl>
                 <div className="grid grid-cols-2 gap-2 pt-2">
@@ -989,7 +1026,7 @@ const ShapeSettingsPanel: React.FC<{shape: fabric.Object, canvas: fabric.Canvas}
                         <input type="range" min="0" max="50" value={localState.strokeWidth} onChange={e => handleStrokeWidthChange(parseInt(e.target.value, 10))} className="w-full accent-accent dark:accent-d-accent" />
                     </LabeledControl>
                  </div>
-                <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 text-red-600 rounded-lg hover:bg-red-500/20"><TrashIcon className="w-4 h-4" />{t('tools.imageCollage.deleteShape')}</button>
+                <button onClick={handleDelete} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-red-500/10 text-red-600 rounded-lg hover:bg-red-500/20"><TrashIcon className="w-4 h-4" />{t('tools.imageCollage.deleteText')}</button>
             </div>
         </PropertiesPanel>
     );
