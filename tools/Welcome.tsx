@@ -28,13 +28,14 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
         <h3 className="text-xl font-bold text-text-primary dark:text-d-text-primary group-hover:text-accent dark:group-hover:text-indigo-400 transition-colors text-readable">
             {t(tool.nameKey)}
         </h3>
-        <p className="mt-2 text-sm text-text-secondary dark:text-d-text-secondary line-clamp-2 font-medium">
+        <p className="mt-2 text-sm text-text-secondary dark:text-slate-400 line-clamp-2 font-medium">
             {t(tool.descriptionKey)}
         </p>
       </div>
       
-      {/* Refractive Light Effect */}
-      <div className="absolute top-0 right-0 -mr-4 -mt-4 w-24 h-24 bg-white/5 dark:bg-white/10 blur-3xl rounded-full group-hover:bg-white/20 transition-all"></div>
+      {/* Refractive Light Effect - Subtle blue glow in Light mode, indigo in Dark mode */}
+      <div className="absolute top-0 right-0 -mr-4 -mt-4 w-32 h-32 bg-blue-400/5 dark:bg-indigo-500/5 blur-3xl rounded-full group-hover:bg-blue-400/10 dark:group-hover:bg-indigo-500/10 transition-all duration-500"></div>
+      <div className="absolute bottom-0 left-0 -ml-4 -mb-4 w-20 h-20 bg-purple-400/5 dark:bg-fuchsia-500/5 blur-2xl rounded-full group-hover:bg-purple-400/10 dark:group-hover:bg-fuchsia-500/10 transition-all duration-700"></div>
     </button>
   );
 };
@@ -73,10 +74,9 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-screen-xl mx-auto px-4">
       <div className="text-center mb-24 relative">
         <h1 className="text-6xl lg:text-7xl font-black tracking-tight text-text-primary dark:text-d-text-primary drop-shadow-xl text-readable">
-            {/* The Smartest <br/> */}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400 dark:from-indigo-400 dark:to-purple-400">Dev Toolbox.</span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400 dark:from-indigo-400 dark:to-purple-300">Dev Toolbox.</span>
         </h1>
-        <p className="mt-6 text-xl max-w-2xl mx-auto text-text-secondary dark:text-d-text-secondary font-semibold leading-relaxed">
+        <p className="mt-6 text-xl max-w-2xl mx-auto text-text-secondary dark:text-slate-400 font-semibold leading-relaxed">
           {t('welcome.subtitle')}
         </p>
       </div>
@@ -86,7 +86,7 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
           <section>
             <div className="flex items-center gap-4 mb-10">
                 <div className="h-px flex-grow bg-gradient-to-r from-transparent to-gray-300 dark:to-gray-700"></div>
-                <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-text-secondary dark:text-d-text-secondary">{t('sidebar.categories.recent')}</h2>
+                <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-text-secondary dark:text-slate-500">{t('sidebar.categories.recent')}</h2>
                 <div className="h-px flex-grow bg-gradient-to-l from-transparent to-gray-300 dark:to-gray-700"></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -119,13 +119,6 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
           </section>
         ))}
       </div>
-       {/* <div className="mt-32 pb-20">
-         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-             <AdvantageCard icon={BrainIcon} title={t('welcome.advantages.inBrowser.title')} description={t('welcome.advantages.inBrowser.description')} />
-             <AdvantageCard icon={UnlockIcon} title={t('welcome.advantages.secure.title')} description={t('welcome.advantages.secure.description')} />
-             <AdvantageCard icon={LockIcon} title={t('welcome.advantages.private.title')} description={t('welcome.advantages.private.description')} />
-         </div>
-       </div> */}
     </div>
   );
 };

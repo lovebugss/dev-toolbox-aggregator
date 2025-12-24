@@ -56,48 +56,76 @@
         overflow-x: hidden;
         background-attachment: fixed;
       }
-
-      /* 增强玻璃质感：更高对比度和饱和度 */
+      
+      /* 全局玻璃质感基础 */
       .glass-panel {
-        background: rgba(255, 255, 255, 0.55);
-        backdrop-filter: blur(30px) saturate(200%);
-        -webkit-backdrop-filter: blur(30px) saturate(200%);
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
       }
 
       .dark .glass-panel {
-        background: rgba(15, 23, 42, 0.7);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+        background: rgba(15, 23, 42, 0.75);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
       }
 
-      /* 线条结构网格 */
+      /* 针对首页卡片的特殊优化 */
+      .glass-card {
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .glass-card:hover {
+        background: rgba(255, 255, 255, 1);
+        border: 1px solid rgba(79, 70, 229, 0.2); /* 浅紫色边框 */
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        transform: translateY(-4px) scale(1.01);
+      }
+
+      .dark .glass-card {
+        background: rgba(30, 41, 59, 0.5); 
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
+      }
+
+      .dark .glass-card:hover {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(99, 102, 241, 0.3); 
+        box-shadow: 0 0 30px -5px rgba(79, 70, 229, 0.2); 
+        transform: translateY(-4px) scale(1.02);
+      }
+
+      /* 网格背景 */
       .grid-bg {
-        background-image:
+        background-image: 
           linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
           linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
         background-size: 60px 60px;
         mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 30%, transparent 100%);
-        pointer-events: none; /* 关键修复：禁止背景层拦截点击事件 */
+        pointer-events: none;
       }
       .dark .grid-bg {
-        background-image:
-          linear-gradient(rgba(139, 92, 246, 0.08) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(139, 92, 246, 0.08) 1px, transparent 1px);
-        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 100%);
+        background-image: 
+          linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
       }
 
-      /* 暗角阴影效果 */
+      /* 暗角效果 */
       .vignette {
         position: fixed;
         inset: 0;
         z-index: -1;
         pointer-events: none;
-        background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.03) 100%);
+        background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.03) 100%);
       }
       .dark .vignette {
-        background: radial-gradient(circle at center, transparent 20%, rgba(2, 6, 23, 0.4) 100%);
+        background: radial-gradient(circle at center, transparent 30%, rgba(2, 6, 23, 0.6) 100%);
       }
 
       .noise-overlay {
@@ -116,15 +144,15 @@
         overflow: hidden;
         pointer-events: none;
       }
-
+      
       .aurora-blob {
         position: absolute;
         filter: blur(100px);
-        opacity: 0.4;
+        opacity: 0.35;
         mix-blend-mode: soft-light;
       }
       .dark .aurora-blob {
-        opacity: 0.25;
+        opacity: 0.2;
         mix-blend-mode: screen;
       }
 
@@ -162,10 +190,7 @@
     "gifuct-js": "https://esm.sh/gifuct-js@^2.1.2",
     "ua-parser-js": "https://esm.sh/ua-parser-js@^2.0.7",
     "diff": "https://esm.sh/diff@^8.0.2",
-    "i18next": "https://esm.sh/i18next@^25.7.3",
-    "vite": "https://esm.sh/vite@^7.3.0",
-    "path": "https://esm.sh/path@^0.12.7",
-    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.1.2"
+    "i18next": "https://esm.sh/i18next@^25.7.3"
   }
 }
 </script>
@@ -187,7 +212,7 @@
 
     <!-- 2. 线条网格层 -->
     <div class="fixed inset-0 grid-bg z-[-1]"></div>
-
+    
     <!-- 3. 暗角与颗粒层 -->
     <div class="vignette"></div>
     <div class="noise-overlay"></div>
