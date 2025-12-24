@@ -193,8 +193,8 @@ const AppContent: React.FC = () => {
     }, [theme]);
 
     useEffect(() => {
-        document.body.className = '';
-    }, []);
+        document.body.className = theme === 'dark' ? 'bg-d-primary grid-bg' : 'bg-primary grid-bg';
+    }, [theme]);
 
     useEffect(() => {
       localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -262,7 +262,8 @@ const AppContent: React.FC = () => {
     return (
         <FullScreenContext.Provider value={{ isFullScreen, setIsFullScreen }}>
           <ThemeContext.Provider value={{ theme, setTheme }}>
-            <div className={`relative min-h-screen bg-primary dark:bg-d-primary font-sans flex flex-col ${isFullScreen ? 'fullscreen-active' : ''}`}>
+            {/* 这里的容器改为透明背景，以便透出 index.html 定义的复杂纹理背景 */}
+            <div className={`relative min-h-screen bg-transparent font-sans flex flex-col ${isFullScreen ? 'fullscreen-active' : ''}`}>
               {!isFullScreen && (
                   <TopNav
                       activeTool={activeTool}

@@ -81,13 +81,13 @@ const NavDropdown: React.FC<{
         <span className="text-readable">{categoryName}</span>
         <VscChevronDownIcon className="w-4 h-4 transition-transform group-hover/nav:rotate-180 opacity-70" />
       </button>
-      {/* 核心修复：初始状态使用 hidden，仅在 hover 时变为 block，彻底防止加载时的瞬时展开 */}
+      {/* 核心修复：使用 dark:bg-d-primary 并确保背景几乎不透明，防止在黑色模式下显示白色背景 */}
       <div className="hidden group-hover/nav:block absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[240px] z-50 animate-in fade-in zoom-in-95 duration-200">
-        <div className="bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl p-2 rounded-2xl border border-black/5 dark:border-white/10 shadow-2xl">
+        <div className="bg-white/95 dark:bg-d-primary border border-black/5 dark:border-white/10 p-2 rounded-2xl shadow-2xl backdrop-blur-3xl">
             <ul className="space-y-1">
             {tools.map(tool => (
                 <li key={tool.id}>
-                <Link to={`/${tool.id}`} onClick={onLinkClick} className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-md' : 'hover:bg-accent/10 dark:hover:bg-indigo-500/20 text-text-primary dark:text-d-text-primary'}`}>
+                <Link to={`/${tool.id}`} onClick={onLinkClick} className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-md' : 'hover:bg-accent/10 dark:hover:bg-white/5 text-text-primary dark:text-d-text-primary'}`}>
                     <tool.icon className={`w-4 h-4 ${activeTool === tool.id ? 'text-white' : 'text-accent'}`} />
                     <span className="font-medium">{t(tool.nameKey)}</span>
                 </Link>
@@ -144,7 +144,6 @@ const TopNav: React.FC<TopNavProps> = ({
                         <h1 className="text-xl font-extrabold text-text-primary dark:text-d-text-primary hidden sm:block tracking-tight text-readable">DevToolbox</h1>
                     </Link>
 
-                    {/* 响应式重构：使用 hidden lg:flex 类名，确保由浏览器底层控制显隐，避免 React 状态闪烁 */}
                     <nav className="hidden lg:flex items-center glass-panel px-2 py-1 rounded-2xl border border-white/10">
                         {favoriteTools.length > 0 && <NavDropdown categoryName={t('sidebar.favorites')} tools={favoriteTools} activeTool={activeTool} onLinkClick={handleLinkClick} />}
                         {toolCategories.map(category => (
@@ -169,7 +168,7 @@ const TopNav: React.FC<TopNavProps> = ({
                             />
                         </div>
                         {isSearchFocused && searchQuery && (
-                            <div className="absolute top-full mt-2 w-full bg-white/95 dark:bg-slate-900/98 backdrop-blur-3xl p-2 rounded-2xl shadow-2xl z-50 border border-black/5 dark:border-white/20">
+                            <div className="absolute top-full mt-2 w-full bg-white/95 dark:bg-d-primary backdrop-blur-3xl p-2 rounded-2xl shadow-2xl z-50 border border-black/5 dark:border-white/10">
                                 {groupedFilteredTools.length > 0 ? (
                                     <div className="max-h-96 overflow-y-auto custom-scrollbar">
                                         {groupedFilteredTools.map(({ category, tools }) => (
@@ -178,7 +177,7 @@ const TopNav: React.FC<TopNavProps> = ({
                                                 <ul className="space-y-1">
                                                     {tools.map(tool => (
                                                         <li key={tool.id}>
-                                                            <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-indigo-400/10 transition-colors">
+                                                            <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-white/5 transition-colors">
                                                                 <tool.icon className="w-4 h-4 text-accent dark:text-indigo-400" />
                                                                 <span className="text-sm font-medium text-text-primary dark:text-d-text-primary">{t(tool.nameKey)}</span>
                                                             </Link>
@@ -206,12 +205,11 @@ const TopNav: React.FC<TopNavProps> = ({
             </div>
         </header>
 
-        {/* 移动端抽屉：增加 hidden 控制，确保在 isMobileSidebarOpen 为 false 时物理上不渲染，彻底根治闪烁 */}
         <div 
             className={`fixed inset-0 z-[100] transition-all duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto block' : 'opacity-0 pointer-events-none hidden'}`}
         >
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
-            <div className={`absolute top-0 right-0 h-full w-[80%] max-w-sm bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-300 transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+            <div className={`absolute top-0 right-0 h-full w-[80%] max-w-sm bg-white dark:bg-d-primary shadow-2xl transition-transform duration-300 transform ${isMobileSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                 <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-white/5">
                     <h2 className="text-xl font-bold text-readable">Menu</h2>
                     <button onClick={() => setIsMobileSidebarOpen(false)} className="p-2 hover:bg-gray-100 dark:hover:bg-white/10 rounded-xl">
