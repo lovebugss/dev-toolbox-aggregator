@@ -8,9 +8,9 @@ const Footer: React.FC = () => {
             <p className="text-sm text-text-secondary dark:text-d-text-secondary">
                 © {currentYear} DevToolbox. All Rights Reserved.
             </p>
-            <a href="https://beian.miit.gov.cn/#/Integrated/index" className="text-xs text-text-secondary dark:text-d-text-secondary mt-2">
+            {/* <a href="https://beian.miit.gov.cn/#/Integrated/index" className="text-xs text-text-secondary dark:text-d-text-secondary mt-2">
                 备案号: 京ICP备19036000号-1
-            </a>
+            </a> */}
         </footer>
     );
 };
