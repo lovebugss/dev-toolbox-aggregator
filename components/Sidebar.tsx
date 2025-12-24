@@ -81,8 +81,8 @@ const NavDropdown: React.FC<{
         <span className="text-readable">{categoryName}</span>
         <VscChevronDownIcon className="w-4 h-4 transition-transform group-hover/nav:rotate-180 opacity-70" />
       </button>
-      {/* 核心修复：使用 dark:bg-d-primary 并确保背景几乎不透明，防止在黑色模式下显示白色背景 */}
-      <div className="hidden group-hover/nav:block absolute top-full left-1/2 -translate-x-1/2 mt-2 min-w-[240px] z-50 animate-in fade-in zoom-in-95 duration-200">
+      {/* 修复：将 mt-2 改为 pt-2，确保触发区连续，防止鼠标移动时下拉框消失 */}
+      <div className="hidden group-hover/nav:block absolute top-full left-1/2 -translate-x-1/2 pt-2 min-w-[240px] z-[60] animate-in fade-in zoom-in-95 duration-200">
         <div className="bg-white/95 dark:bg-d-primary border border-black/5 dark:border-white/10 p-2 rounded-2xl shadow-2xl backdrop-blur-3xl">
             <ul className="space-y-1">
             {tools.map(tool => (
@@ -100,7 +100,7 @@ const NavDropdown: React.FC<{
   );
 };
 
-const TopNav: React.FC<TopNavProps> = ({
+const TopNav: React.FC<TopNavProps> = ({ 
     activeTool, theme, setTheme,
     isMobileSidebarOpen, setIsMobileSidebarOpen,
     favorites, searchInputRef
@@ -108,7 +108,7 @@ const TopNav: React.FC<TopNavProps> = ({
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-
+  
   const allTools = useMemo(() => toolCategories.flatMap(c => c.tools), []);
   const favoriteTools = useMemo(() => allTools.filter(tool => favorites.includes(tool.id)), [favorites, allTools]);
 
@@ -134,7 +134,7 @@ const TopNav: React.FC<TopNavProps> = ({
 
   return (
     <>
-        <header className="sticky top-0 z-40 h-20 w-full px-4 sm:px-6 lg:px-8 flex-shrink-0 bg-transparent">
+        <header className="sticky top-0 z-50 h-20 w-full px-4 sm:px-6 lg:px-8 flex-shrink-0 bg-transparent">
             <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
                 <div className="flex items-center gap-4 lg:gap-8">
                     <Link to="/" className="flex items-center gap-3 group">
@@ -151,7 +151,7 @@ const TopNav: React.FC<TopNavProps> = ({
                         ))}
                     </nav>
                 </div>
-
+                
                 <div className="flex items-center gap-4">
                     <div className="relative hidden md:block">
                         <div className={`flex items-center glass-panel rounded-2xl px-4 py-2 transition-all duration-300 border border-white/10 ${isSearchFocused ? 'w-80 ring-2 ring-accent/50' : 'w-64'}`}>
@@ -168,34 +168,35 @@ const TopNav: React.FC<TopNavProps> = ({
                             />
                         </div>
                         {isSearchFocused && searchQuery && (
-                            <div className="absolute top-full mt-2 w-full bg-white/95 dark:bg-d-primary backdrop-blur-3xl p-2 rounded-2xl shadow-2xl z-50 border border-black/5 dark:border-white/10">
-                                {groupedFilteredTools.length > 0 ? (
-                                    <div className="max-h-96 overflow-y-auto custom-scrollbar">
-                                        {groupedFilteredTools.map(({ category, tools }) => (
-                                            <div key={category.nameKey} className="mb-2 last:mb-0">
-                                                <h3 className="px-3 pt-2 pb-1 text-[10px] font-bold text-accent dark:text-indigo-400 uppercase tracking-widest">{t(category.nameKey)}</h3>
-                                                <ul className="space-y-1">
-                                                    {tools.map(tool => (
-                                                        <li key={tool.id}>
-                                                            <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-white/5 transition-colors">
-                                                                <tool.icon className="w-4 h-4 text-accent dark:text-indigo-400" />
-                                                                <span className="text-sm font-medium text-text-primary dark:text-d-text-primary">{t(tool.nameKey)}</span>
-                                                            </Link>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="p-4 text-center text-sm text-text-secondary dark:text-d-text-secondary">{t('sidebar.noResults')}</div>
-                                )}
+                            <div className="absolute top-full pt-2 w-full z-[60]">
+                                <div className="bg-white/95 dark:bg-d-primary backdrop-blur-3xl p-2 rounded-2xl shadow-2xl border border-black/5 dark:border-white/10">
+                                    {groupedFilteredTools.length > 0 ? (
+                                        <div className="max-h-96 overflow-y-auto custom-scrollbar">
+                                            {groupedFilteredTools.map(({ category, tools }) => (
+                                                <div key={category.nameKey} className="mb-2 last:mb-0">
+                                                    <h3 className="px-3 pt-2 pb-1 text-[10px] font-bold text-accent dark:text-indigo-400 uppercase tracking-widest">{t(category.nameKey)}</h3>
+                                                    <ul className="space-y-1">
+                                                        {tools.map(tool => (
+                                                            <li key={tool.id}>
+                                                                <Link to={`/${tool.id}`} onClick={handleLinkClick} className="flex items-center gap-3 p-2 rounded-xl hover:bg-accent/10 dark:hover:bg-white/5 transition-colors">
+                                                                    <tool.icon className="w-4 h-4 text-accent dark:text-indigo-400" />
+                                                                    <span className="text-sm font-medium text-text-primary dark:text-d-text-primary">{t(tool.nameKey)}</span>
+                                                                </Link>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 text-center text-sm text-text-secondary dark:text-d-text-secondary">{t('sidebar.noResults')}</div>
+                                    )}
+                                </div>
                             </div>
                         )}
                     </div>
-
+                    
                     <div className="flex items-center gap-2">
-                        {/*<LanguageSwitcher />*/}
                         <ThemeSwitcher theme={theme} setTheme={setTheme} />
                         <button onClick={() => setIsMobileSidebarOpen(true)} className="lg:hidden p-3 glass-panel rounded-2xl ml-2 border border-white/10 active:scale-95 transition-transform">
                             <MenuIcon className="w-5 h-5 text-text-primary dark:text-d-text-primary" />
@@ -205,7 +206,7 @@ const TopNav: React.FC<TopNavProps> = ({
             </div>
         </header>
 
-        <div
+        <div 
             className={`fixed inset-0 z-[100] transition-all duration-300 ${isMobileSidebarOpen ? 'opacity-100 pointer-events-auto block' : 'opacity-0 pointer-events-none hidden'}`}
         >
             <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setIsMobileSidebarOpen(false)} />
@@ -222,9 +223,9 @@ const TopNav: React.FC<TopNavProps> = ({
                             <h3 className="px-4 mb-2 text-xs font-bold text-accent dark:text-indigo-400 uppercase tracking-widest opacity-70">{t(category.nameKey)}</h3>
                             <div className="space-y-1">
                                 {category.tools.map(tool => (
-                                    <Link
-                                        key={tool.id}
-                                        to={`/${tool.id}`}
+                                    <Link 
+                                        key={tool.id} 
+                                        to={`/${tool.id}`} 
                                         onClick={handleLinkClick}
                                         className={`flex items-center gap-4 px-4 py-3 rounded-2xl text-sm font-medium transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-lg' : 'text-text-primary dark:text-d-text-primary hover:bg-gray-100 dark:hover:bg-white/5'}`}
                                     >
