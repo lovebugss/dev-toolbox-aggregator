@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toolCategories, ToolId, Tool } from '../types';
 
@@ -19,13 +19,9 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
     const card = cardRef.current;
     if (!card) return;
-    
-    // 使用 getBoundingClientRect 获取精确位置
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    
-    // 批量更新自定义属性
     card.style.setProperty('--mx', `${x}px`);
     card.style.setProperty('--my', `${y}px`);
   };
@@ -33,9 +29,8 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
   const handleMouseLeave = () => {
     const card = cardRef.current;
     if (!card) return;
-    // 离开时将效果移出视野
-    card.style.setProperty('--mx', `-100%`);
-    card.style.setProperty('--my', `-100%`);
+    card.style.setProperty('--mx', `-1000px`);
+    card.style.setProperty('--my', `-1000px`);
   };
   
   return (
@@ -46,7 +41,6 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
       onMouseLeave={handleMouseLeave}
       className="glass-card group relative p-6 text-left rounded-[2.5rem] overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-accent"
     >
-      {/* 装饰性背景光 - 移除冗余过渡层，改为更轻量的渐变装饰 */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.02] pointer-events-none transition-opacity duration-700 bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 z-0"></div>
       
       <div className="relative z-10 flex flex-col h-full">
@@ -61,22 +55,9 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
         </p>
       </div>
       
-      {/* 静态装饰光环 */}
       <div className="absolute top-0 right-0 -mr-4 -mt-4 w-32 h-32 bg-blue-400/5 dark:bg-indigo-500/10 blur-3xl rounded-full group-hover:bg-blue-400/10 dark:group-hover:bg-indigo-500/20 transition-all duration-500"></div>
     </button>
   );
-};
-
-const AdvantageCard: React.FC<{ icon: React.ElementType, title: string, description: string }> = ({ icon: Icon, title, description }) => {
-    return (
-        <div className="glass-panel p-8 rounded-3xl text-center hover:scale-105 transition-all duration-300 border border-white/10">
-            <div className="inline-flex items-center justify-center w-14 h-14 mb-6 rounded-2xl bg-accent text-white shadow-xl shadow-accent/20">
-                <Icon className="w-7 h-7" />
-            </div>
-            <h3 className="text-lg font-bold text-text-primary dark:text-d-text-primary mb-3 text-readable">{title}</h3>
-            <p className="text-sm text-text-secondary dark:text-d-text-secondary leading-relaxed font-medium">{description}</p>
-        </div>
-    );
 };
 
 interface WelcomeProps {
@@ -89,6 +70,13 @@ interface WelcomeProps {
 const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTools, usageCount }) => {
   const { t } = useTranslation();
   const allTools = useMemo(() => toolCategories.flatMap(c => c.tools), []);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // 延迟显示内容，配合主题阻塞脚本，确保渲染时主题已定
+    const timer = setTimeout(() => setIsReady(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const recentToolsData = useMemo(() => {
       return recentTools
@@ -98,7 +86,7 @@ const Welcome: React.FC<WelcomeProps> = ({ setActiveTool, recentTools, totalTool
   }, [recentTools, allTools]);
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-1000 max-w-screen-xl mx-auto px-4">
+    <div className={`max-w-screen-xl mx-auto px-4 transition-all duration-700 ${isReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
       <div className="text-center mb-24 relative">
         <h1 className="text-6xl lg:text-7xl font-black tracking-tight text-text-primary dark:text-d-text-primary drop-shadow-xl text-readable">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-purple-400 dark:from-indigo-400 dark:to-purple-300">Dev Toolbox.</span>

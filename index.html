@@ -8,6 +8,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      // 核心防闪烁脚本：在 DOM 解析前应用主题
+      (function() {
+        try {
+          var theme = localStorage.getItem('theme') || 'dark';
+          document.documentElement.classList.add(theme);
+          document.documentElement.style.colorScheme = theme;
+        } catch (e) {}
+      })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -83,22 +93,21 @@
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(0, 0, 0, 0.05);
-        /* 硬件加速与渲染优化 */
         transform: translateZ(0);
         backface-visibility: hidden;
         will-change: transform, box-shadow;
-        /* 细化过渡属性，避免 all 带来的闪烁 */
-        transition-property: transform, box-shadow, background-color, border-color;
-        transition-duration: 0.5s;
-        transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+        /* 细化过渡属性，避免 all 带来的全量重绘 */
+        transition: 
+          transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+          box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1),
+          background-color 0.3s ease,
+          border-color 0.3s ease;
         position: relative;
         overflow: hidden;
-        /* 初始位置设为视野外 */
-        --mx: -100%;
-        --my: -100%;
+        --mx: -1000px;
+        --my: -1000px;
       }
 
-      /* 鼠标跟随的焦点亮光 */
       .glass-card::before {
         content: '';
         position: absolute;
@@ -125,14 +134,12 @@
         transform: translateY(-8px) scale(1.02);
       }
 
-      /* 深色模式增强 */
       .dark .glass-card {
         background: rgba(30, 41, 59, 0.5); 
         border: 1px solid rgba(255, 255, 255, 0.08);
         box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
       }
 
-      /* 深色模式下的鼠标跟随全息遮罩 */
       .dark .glass-card::after {
         content: "";
         position: absolute;
@@ -163,7 +170,6 @@
           0 10px 40px -5px rgba(168, 85, 247, 0.2);
       }
 
-      /* 网格背景 */
       .grid-bg {
         background-image: 
           linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
@@ -178,7 +184,6 @@
           linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
       }
 
-      /* 暗角效果 */
       .vignette {
         position: fixed;
         inset: 0;
@@ -222,6 +227,11 @@
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
       .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); }
+
+      /* 防止菜单闪烁的辅助类 */
+      .no-transition {
+        transition: none !important;
+      }
     </style>
   <script type="importmap">
 {
@@ -264,8 +274,7 @@
 <script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
 <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-primary dark:bg-d-primary transition-colors duration-700 min-h-screen relative">
-    <!-- 1. 最底层颜色层 -->
+  <body class="bg-primary dark:bg-d-primary relative min-h-screen">
     <div class="blob-bg">
       <div class="aurora-blob aurora-1 top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500 rounded-full"></div>
       <div class="aurora-blob aurora-2 top-[-15%] right-[-10%] w-[45%] h-[55%] bg-blue-600 rounded-full"></div>
@@ -273,10 +282,8 @@
       <div class="aurora-blob aurora-1 bottom-[-5%] right-[-15%] w-[40%] h-[60%] bg-teal-500 rounded-full"></div>
     </div>
 
-    <!-- 2. 线条网格层 -->
     <div class="fixed inset-0 grid-bg z-[-1]"></div>
     
-    <!-- 3. 暗角与颗粒层 -->
     <div class="vignette"></div>
     <div class="noise-overlay"></div>
 

@@ -155,7 +155,14 @@ const useMediaQuery = (query: string) => {
 };
 
 const AppContent: React.FC = () => {
-    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
+    // 同步初始化主题状态，确保与 index.html 的脚本一致
+    const [theme, setTheme] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('theme') || 'dark';
+        }
+        return 'dark';
+    });
+    
     const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
     const [isFullScreen, setIsFullScreen] = useState(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -165,7 +172,6 @@ const AppContent: React.FC = () => {
         if (saved) {
             return parseInt(saved, 10);
         }
-        // Initialize with a random larger number for effect
         const initialCount = Math.floor(Math.random() * (50000 - 10000 + 1)) + 10000;
         localStorage.setItem('usageCount', String(initialCount));
         return initialCount;
@@ -193,12 +199,9 @@ const AppContent: React.FC = () => {
 
     useEffect(() => {
       document.documentElement.className = theme;
+      document.documentElement.style.colorScheme = theme;
       localStorage.setItem('theme', theme);
     }, [theme]);
-
-    useEffect(() => {
-        document.body.className = '';
-    }, []);
 
     useEffect(() => {
       localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -213,7 +216,7 @@ const AppContent: React.FC = () => {
             setRecentTools(prev => {
                 const updated = prev.filter(id => id !== activeTool);
                 updated.unshift(activeTool);
-                return updated.slice(0, 5); // Keep a history of the last 5 used tools
+                return updated.slice(0, 5);
             });
             
             setUsageCount(prev => {
@@ -239,12 +242,8 @@ const AppContent: React.FC = () => {
                 searchInputRef.current?.focus();
             }
         };
-
         window.addEventListener('keydown', handleKeyDown);
-
-        return () => {
-            window.removeEventListener('keydown', handleKeyDown);
-        };
+        return () => window.removeEventListener('keydown', handleKeyDown);
     }, []);
     
     const handleWelcomeToolClick = useCallback((toolId: ToolId) => {
