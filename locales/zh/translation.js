@@ -51,6 +51,26 @@ export default {
     "servedCount": "共帮助人次"
   },
   "tools": {
+    "httpClient": {
+        "name": "HTTP 客户端",
+        "description": "直接在浏览器中发送 HTTP 请求，方便测试 API 接口。",
+        "pageTitle": "HTTP 请求测试",
+        "pageDescription": "输入 URL，选择请求方法，添加 Header 或 Body，即可查看响应。注意：请求受浏览器 CORS 跨域策略限制。",
+        "urlPlaceholder": "输入请求地址...",
+        "send": "发送",
+        "sending": "发送中...",
+        "headers": "请求头",
+        "body": "请求体 (JSON)",
+        "response": "响应结果",
+        "status": "状态码",
+        "time": "耗时",
+        "size": "大小",
+        "noResponse": "暂无响应。填写上方信息并点击“发送”。",
+        "corsHint": "浏览器安全提示：如果请求失败，可能是目标服务器未开启跨域支持 (CORS)。",
+        "key": "键",
+        "value": "值",
+        "addHeader": "添加 Header"
+    },
     "excelToJson": {
         "name": "Excel 转 JSON",
         "description": "将 Excel 文件（.xlsx, .xls）转换为 JSON 数据。",
@@ -574,14 +594,12 @@ export default {
     "md5Hasher": {
       "name": "MD5 哈希生成器", "description": "计算给定文本字符串的 MD5 哈希值。",
       "pageTitle": "MD5 哈希生成器", "pageDescription": "从您的文本输入生成 MD5 哈希。MD5 是一种广泛使用的加密哈希函数，产生一个128位的哈希值。",
-      "inputLabel": "输入文本",
-      "outputLabel": "MD5 哈希输出",
-      "placeholder": "在此输入或粘贴文本",
+      "inputLabel": "输入文本", "outputLabel": "MD5 哈希输出", "placeholder": "在此输入或粘贴文本",
       "uppercase": "大写"
     },
     "ledScroller": {
       "name": "LED 滚动屏", "description": "模拟一个可自定义文本和样式的滚动 LED 标志。",
-      "pageTitle": "LED 滚动屏模拟器", "pageDescription": "创建一个可自定义的滚动文本显示。输入您的消息，调整设置，然后全屏以获得逼真效果。",
+      "pageTitle": "LED 滚动屏模拟器", "pageDescription": "创建一个可自定义的滚动文本 display。输入您的消息，调整设置，然后全屏以获得逼真效果。",
       "textLabel": "显示文本", "textPlaceholder": "你的消息",
       "speedLabel": "速度", "slow": "慢", "fast": "快",
       "textColor": "文本颜色", "backgroundColor": "背景颜色",
@@ -697,8 +715,7 @@ export default {
     "svgShapeGenerator": {
       "name": "SVG 形状生成器",
       "description": "创建带有渐变和轮廓的随机有机 SVG 形状。",
-      "pageTitle": "SVG 形状生成器",
-      "pageDescription": "生成独特的、类似斑点的 SVG 形状。自定义复杂度、颜色并导出代码。",
+      "pageTitle": "SVG 形状生成器", "pageDescription": "生成独特的、类似斑点的 SVG 形状。自定义复杂度、颜色并导出代码。",
       "regenerate": "重新生成形状",
       "shape": "形状",
       "complexity": "复杂度",

@@ -62,6 +62,7 @@ import PdfSplitter from './tools/PdfSplitter';
 import PdfMerger from './tools/PdfMerger';
 import PdfWatermark from './tools/PdfWatermark';
 import PdfCompressor from './tools/PdfCompressor';
+import HttpClient from './tools/HttpClient';
 
 export const FullScreenContext = createContext<{
     isFullScreen: boolean;
@@ -134,6 +135,7 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'pdf-merger': PdfMerger,
   'pdf-watermark': PdfWatermark,
   'pdf-compressor': PdfCompressor,
+  'http-client': HttpClient,
 };
 
 const useMediaQuery = (query: string) => {

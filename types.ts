@@ -9,7 +9,7 @@ import {
 
 export type ToolId =
   // Web
-  | 'url-parser' | 'ip-lookup' | 'phone-lookup' | 'postal-code-lookup' | 'user-agent-viewer' | 'websocket-client'
+  | 'url-parser' | 'ip-lookup' | 'phone-lookup' | 'postal-code-lookup' | 'user-agent-viewer' | 'websocket-client' | 'http-client'
   // Text
   | 'text-counter' | 'text-diff' | 'regex-editor' | 'character-frequency-counter' | 'set-calculator' | 'morse-code-translator'
   // Image & Video
@@ -44,11 +44,9 @@ export const toolCategories: ToolCategory[] = [
     nameKey: 'sidebar.categories.web',
     tools: [
       { id: 'url-parser', nameKey: 'tools.urlParser.name', descriptionKey: 'tools.urlParser.description', icon: LinkIcon },
+      { id: 'http-client', nameKey: 'tools.httpClient.name', descriptionKey: 'tools.httpClient.description', icon: BroadcastIcon },
       { id: 'user-agent-viewer', nameKey: 'tools.userAgentViewer.name', descriptionKey: 'tools.userAgentViewer.description', icon: GlobeIcon },
       { id: 'websocket-client', nameKey: 'tools.websocketClient.name', descriptionKey: 'tools.websocketClient.description', icon: PlugConnectedIcon },
-      // { id: 'ip-lookup', nameKey: 'tools.ipLookup.name', descriptionKey: 'tools.ipLookup.description', icon: GlobeIcon },
-      // { id: 'phone-lookup', nameKey: 'tools.phoneLookup.name', descriptionKey: 'tools.phoneLookup.description', icon: PhoneIcon },
-      // { id: 'postal-code-lookup', nameKey: 'tools.postalCodeLookup.name', descriptionKey: 'tools.postalCodeLookup.description', icon: MailboxIcon },
     ],
   },
   {
@@ -72,7 +70,6 @@ export const toolCategories: ToolCategory[] = [
       { id: 'image-grid-splitter', nameKey: 'tools.imageGridSplitter.name', descriptionKey: 'tools.imageGridSplitter.description', icon: GridIcon },
       { id: 'dicom-viewer', nameKey: 'tools.dicomViewer.name', descriptionKey: 'tools.dicomViewer.description', icon: DicomFileIcon },
       { id: 'stream-broadcaster', nameKey: 'tools.streamBroadcaster.name', descriptionKey: 'tools.streamBroadcaster.description', icon: BroadcastIcon },
-      // { id: 'video-to-gif', nameKey: 'tools.videoToGif.name', descriptionKey: 'tools.videoToGif.description', icon: FilmIcon },
     ],
   },
   {

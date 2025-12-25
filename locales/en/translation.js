@@ -51,6 +51,26 @@ export default {
     "servedCount": "Times Served"
   },
   "tools": {
+    "httpClient": {
+        "name": "HTTP Client",
+        "description": "Send HTTP requests directly from your browser to test APIs.",
+        "pageTitle": "HTTP Request Tester",
+        "pageDescription": "Enter URL, select method, add headers or body, and see the response. Note: Requests are subject to browser CORS policies.",
+        "urlPlaceholder": "Enter request URL...",
+        "send": "Send",
+        "sending": "Sending...",
+        "headers": "Headers",
+        "body": "Body (JSON)",
+        "response": "Response",
+        "status": "Status",
+        "time": "Time",
+        "size": "Size",
+        "noResponse": "No response yet. Fill the details above and click 'Send'.",
+        "corsHint": "Browser Security Tip: If the request fails, the target server might not support CORS.",
+        "key": "Key",
+        "value": "Value",
+        "addHeader": "Add Header"
+    },
     "excelToJson": {
         "name": "Excel to JSON",
         "description": "Convert Excel files (.xlsx, .xls) to JSON data.",
@@ -689,9 +709,7 @@ export default {
       "description": "Compute the MD5 hash of a given text string.",
       "pageTitle": "MD5 Hash Generator",
       "pageDescription": "Generate the MD5 hash from your text input. MD5 is a widely used cryptographic hash function producing a 128-bit hash value.",
-      "inputLabel": "Input Text",
-      "outputLabel": "MD5 Hash Output",
-      "placeholder": "Type or paste your text here",
+      "inputLabel": "Input Text", "outputLabel": "MD5 Hash Output", "placeholder": "Type or paste your text here",
       "uppercase": "Uppercase"
     },
     "ledScroller": {
