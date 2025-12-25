@@ -48,26 +48,6 @@ const ThemeSwitcher: React.FC<{ theme: string; setTheme: (theme: string) => void
     );
 };
 
-const LanguageSwitcher: React.FC<{}> = () => {
-    const { i18n, t } = useTranslation();
-    const languages = [ { code: 'en-US', label: 'EN' }, { code: 'zh-CN', label: 'ZH' } ];
-    const currentLang = languages.find(l => i18n.language.startsWith(l.code.slice(0, 2))) || languages[0];
-
-    return (
-        <div className="flex items-center glass-panel p-1 rounded-full">
-            {languages.map(lang => (
-                <button
-                    key={lang.code}
-                    onClick={() => i18n.changeLanguage(lang.code)}
-                    className={`px-3 py-1 text-xs font-bold rounded-full transition-all ${currentLang.code === lang.code ? 'bg-accent text-white shadow-lg' : 'text-text-secondary dark:text-d-text-secondary hover:bg-white/10'}`}
-                >
-                    {lang.label}
-                </button>
-            ))}
-        </div>
-    );
-};
-
 const NavDropdown: React.FC<{
     categoryName: string;
     tools: Tool[];
@@ -75,21 +55,47 @@ const NavDropdown: React.FC<{
     onLinkClick: () => void;
 }> = ({ categoryName, tools, activeTool, onLinkClick }) => {
     const { t } = useTranslation();
+
+    // 检查该分类下是否有工具处于激活状态
+    const isCategoryActive = useMemo(() => {
+        return tools.some(tool => tool.id === activeTool);
+    }, [tools, activeTool]);
+
     return (
-        <div className="relative group/nav">
-            <button className="flex items-center gap-1.5 text-sm font-semibold py-2 px-3 rounded-xl hover:bg-white/20 dark:hover:bg-white/5 transition-all text-text-primary dark:text-d-text-primary whitespace-nowrap">
-                <span className="text-readable">{categoryName}</span>
-                <VscChevronDownIcon className="w-4 h-4 transition-transform group-hover/nav:rotate-180 opacity-70" />
+        <div className="relative group/nav h-full flex items-center">
+            <button
+                className={`flex items-center gap-1.5 text-sm font-bold py-2 px-3.5 rounded-xl transition-all relative ${
+                    isCategoryActive
+                        ? 'bg-accent/10 dark:bg-indigo-400/10 text-accent dark:text-indigo-400'
+                        : 'text-text-primary dark:text-d-text-primary hover:bg-white/20 dark:hover:bg-white/5 opacity-80 hover:opacity-100'
+                }`}
+            >
+                <span className="whitespace-nowrap">{categoryName}</span>
+                <VscChevronDownIcon className={`w-3.5 h-3.5 transition-transform duration-300 group-hover/nav:rotate-180 ${isCategoryActive ? 'opacity-100' : 'opacity-50'}`} />
+
+                {/* 激活时的底部发光指示线 */}
+                {isCategoryActive && (
+                    <span className="absolute -bottom-1 left-3 right-3 h-0.5 bg-accent dark:bg-indigo-400 rounded-full shadow-[0_0_8px_rgba(79,70,229,0.6)] animate-in fade-in zoom-in duration-500"></span>
+                )}
             </button>
-            {/* 修复：将 mt-2 改为 pt-2，确保触发区连续，防止鼠标移动时下拉框消失 */}
-            <div className="hidden group-hover/nav:block absolute top-full left-1/2 -translate-x-1/2 pt-2 min-w-[240px] z-[60] animate-in fade-in zoom-in-95 duration-200">
-                <div className="bg-white/95 dark:bg-d-primary border border-black/5 dark:border-white/10 p-2 rounded-2xl shadow-2xl backdrop-blur-3xl">
+
+            {/* 下拉菜单容器 */}
+            <div className="invisible group-hover/nav:visible opacity-0 group-hover/nav:opacity-100 absolute top-full left-1/2 -translate-x-1/2 pt-2 min-w-[260px] z-[60] transition-all duration-200 transform translate-y-2 group-hover/nav:translate-y-0">
+                <div className="bg-white/95 dark:bg-slate-900/95 border border-black/5 dark:border-white/10 p-2 rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] backdrop-blur-3xl">
                     <ul className="space-y-1">
                         {tools.map(tool => (
                             <li key={tool.id}>
-                                <Link to={`/${tool.id}`} onClick={onLinkClick} className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all ${activeTool === tool.id ? 'bg-accent text-white shadow-md' : 'hover:bg-accent/10 dark:hover:bg-white/5 text-text-primary dark:text-d-text-primary'}`}>
-                                    <tool.icon className={`w-4 h-4 ${activeTool === tool.id ? 'text-white' : 'text-accent'}`} />
-                                    <span className="font-medium">{t(tool.nameKey)}</span>
+                                <Link
+                                    to={`/${tool.id}`}
+                                    onClick={onLinkClick}
+                                    className={`flex items-center gap-3 px-3 py-2.5 text-sm rounded-xl transition-all ${
+                                        activeTool === tool.id
+                                            ? 'bg-accent text-white shadow-lg shadow-accent/20 scale-[1.02]'
+                                            : 'hover:bg-accent/10 dark:hover:bg-white/5 text-text-primary dark:text-d-text-primary'
+                                    }`}
+                                >
+                                    <tool.icon className={`w-4 h-4 ${activeTool === tool.id ? 'text-white' : 'text-accent dark:text-indigo-400'}`} />
+                                    <span className="font-semibold">{t(tool.nameKey)}</span>
                                 </Link>
                             </li>
                         ))}
@@ -136,7 +142,7 @@ const TopNav: React.FC<TopNavProps> = ({
         <>
             <header className="sticky top-0 z-50 h-20 w-full px-4 sm:px-6 lg:px-8 flex-shrink-0 bg-transparent">
                 <div className="max-w-screen-2xl mx-auto h-full flex items-center justify-between">
-                    <div className="flex items-center gap-4 lg:gap-8">
+                    <div className="flex items-center gap-4 lg:gap-8 h-full">
                         <Link to="/" className="flex items-center gap-3 group">
                             <div className="p-2 glass-panel rounded-2xl group-hover:scale-110 transition-transform bg-accent shadow-indigo-500/30 shadow-lg">
                                 <ToolboxIcon className="w-6 h-6 text-white" />
@@ -144,7 +150,7 @@ const TopNav: React.FC<TopNavProps> = ({
                             <h1 className="text-xl font-extrabold text-text-primary dark:text-d-text-primary hidden sm:block tracking-tight text-readable">DevToolbox</h1>
                         </Link>
 
-                        <nav className="hidden lg:flex items-center glass-panel px-2 py-1 rounded-2xl border border-white/10">
+                        <nav className="hidden lg:flex items-center glass-panel px-2 h-12 rounded-2xl border border-white/10 self-center">
                             {favoriteTools.length > 0 && <NavDropdown categoryName={t('sidebar.favorites')} tools={favoriteTools} activeTool={activeTool} onLinkClick={handleLinkClick} />}
                             {toolCategories.map(category => (
                                 <NavDropdown key={category.nameKey} categoryName={t(category.nameKey)} tools={category.tools} activeTool={activeTool} onLinkClick={handleLinkClick} />
@@ -169,7 +175,7 @@ const TopNav: React.FC<TopNavProps> = ({
                             </div>
                             {isSearchFocused && searchQuery && (
                                 <div className="absolute top-full pt-2 w-full z-[60]">
-                                    <div className="bg-white/95 dark:bg-d-primary backdrop-blur-3xl p-2 rounded-2xl shadow-2xl border border-black/5 dark:border-white/10">
+                                    <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-3xl p-2 rounded-2xl shadow-2xl border border-black/5 dark:border-white/10">
                                         {groupedFilteredTools.length > 0 ? (
                                             <div className="max-h-96 overflow-y-auto custom-scrollbar">
                                                 {groupedFilteredTools.map(({ category, tools }) => (
