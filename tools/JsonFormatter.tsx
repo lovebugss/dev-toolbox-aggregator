@@ -17,6 +17,31 @@ type CollapsedPaths = Record<string, boolean>;
 
 // --- HELPER & UI COMPONENTS ---
 
+/**
+ * 宽松的 JSON 解析器
+ * 支持未加引号的键、单引号、尾随逗号和注释
+ */
+const laxParse = (str: string): any => {
+    const trimmed = str.trim();
+    if (!trimmed) return null;
+
+    // 尝试原生解析
+    try {
+        return JSON.parse(trimmed);
+    } catch (e) {
+        // 尝试解析为 JS 对象字面量 (支持更宽松的格式)
+        try {
+            // 使用 new Function 构造一个返回该对象的函数
+            // 注意：这种方式在处理恶意输入时存在安全风险，但作为本地工具是常用的折中方案
+            const fn = new Function(`"use strict"; return (${trimmed});`);
+            return fn();
+        } catch (laxError: any) {
+            // 如果宽松解析也失败，抛出原始的 JSON.parse 错误或宽松解析错误
+            throw new Error(laxError.message);
+        }
+    }
+};
+
 const removeNulls = (obj: any): any => {
     if (Array.isArray(obj)) {
         return obj
@@ -159,7 +184,8 @@ const JsonFormatter: React.FC = () => {
             return;
         }
         try {
-            let parsed = JSON.parse(jsonString);
+            // 使用改进后的宽松解析
+            let parsed = laxParse(jsonString);
             if (filterNullValues) {
                 parsed = removeNulls(parsed);
             }
