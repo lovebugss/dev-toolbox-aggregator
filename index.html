@@ -77,18 +77,25 @@
         box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
       }
 
-      /* 首页卡片样式 */
+      /* 首页卡片样式：优化性能防止闪烁 */
       .glass-card {
         background: rgba(255, 255, 255, 0.7);
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(0, 0, 0, 0.05);
-        transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.5s ease, background 0.5s ease;
+        /* 硬件加速与渲染优化 */
+        transform: translateZ(0);
+        backface-visibility: hidden;
+        will-change: transform, box-shadow;
+        /* 细化过渡属性，避免 all 带来的闪烁 */
+        transition-property: transform, box-shadow, background-color, border-color;
+        transition-duration: 0.5s;
+        transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
         position: relative;
         overflow: hidden;
-        /* 鼠标跟随变量默认中心 */
-        --mx: 50%;
-        --my: 50%;
+        /* 初始位置设为视野外 */
+        --mx: -100%;
+        --my: -100%;
       }
 
       /* 鼠标跟随的焦点亮光 */
@@ -102,7 +109,7 @@
           transparent 40%
         );
         opacity: 0;
-        transition: opacity 0.5s ease;
+        transition: opacity 0.4s ease;
         z-index: 5;
         pointer-events: none;
       }

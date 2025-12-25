@@ -1,7 +1,6 @@
 import React, { useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toolCategories, ToolId, Tool } from '../types';
-import { BrainIcon, UnlockIcon, LockIcon } from '../components/icons/Icons';
 
 const gradients = [
   'from-indigo-500 to-blue-500', 
@@ -18,13 +17,25 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
   const cardRef = useRef<HTMLButtonElement>(null);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
+    const card = cardRef.current;
+    if (!card) return;
+    
+    // 使用 getBoundingClientRect 获取精确位置
+    const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
-    cardRef.current.style.setProperty('--mx', `${x}px`);
-    cardRef.current.style.setProperty('--my', `${y}px`);
+    // 批量更新自定义属性
+    card.style.setProperty('--mx', `${x}px`);
+    card.style.setProperty('--my', `${y}px`);
+  };
+
+  const handleMouseLeave = () => {
+    const card = cardRef.current;
+    if (!card) return;
+    // 离开时将效果移出视野
+    card.style.setProperty('--mx', `-100%`);
+    card.style.setProperty('--my', `-100%`);
   };
   
   return (
@@ -32,10 +43,11 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
       ref={cardRef}
       onClick={onClick}
       onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       className="glass-card group relative p-6 text-left rounded-[2.5rem] overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-accent"
     >
-      {/* Holographic Subtle Pearl Overlay (Follows Mouse indirectly via radial masks in CSS) */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity duration-700 bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 z-0"></div>
+      {/* 装饰性背景光 - 移除冗余过渡层，改为更轻量的渐变装饰 */}
+      <div className="absolute inset-0 opacity-0 group-hover:opacity-[0.02] pointer-events-none transition-opacity duration-700 bg-gradient-to-tr from-red-500 via-green-500 to-blue-500 z-0"></div>
       
       <div className="relative z-10 flex flex-col h-full">
         <div className={`w-14 h-14 mb-6 rounded-2xl flex items-center justify-center bg-gradient-to-br ${gradient} shadow-lg shadow-indigo-500/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
@@ -49,7 +61,7 @@ const ToolCard: React.FC<{ tool: Tool; onClick: () => void; gradient: string }> 
         </p>
       </div>
       
-      {/* Dynamic Static Glows (The responsive ones are in index.html ::before and ::after) */}
+      {/* 静态装饰光环 */}
       <div className="absolute top-0 right-0 -mr-4 -mt-4 w-32 h-32 bg-blue-400/5 dark:bg-indigo-500/10 blur-3xl rounded-full group-hover:bg-blue-400/10 dark:group-hover:bg-indigo-500/20 transition-all duration-500"></div>
     </button>
   );
