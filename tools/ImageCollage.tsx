@@ -423,8 +423,9 @@ const ImageCollage: React.FC = () => {
             const file = files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = (event) => setPlacedImages(prev => ({ ...prev, [cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-                reader.readAsDataURL(file);
+                reader.onload = (event) => (event.target?.result as string) && setPlacedImages(prev => ({ ...prev, [cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
+                // FIX: Cast file to Blob to ensure type compatibility with readAsDataURL.
+                reader.readAsDataURL(file as Blob);
             }
         } else {
             const canvas = fabricCanvasRef.current;
@@ -443,7 +444,8 @@ const ImageCollage: React.FC = () => {
                         setPlacedImages(newImages);
                     }
                 };
-                reader.readAsDataURL(file);
+                // FIX: Cast file to Blob to ensure type compatibility with readAsDataURL.
+                reader.readAsDataURL(file as Blob);
             });
         }
         e.target.value = '';
@@ -770,7 +772,8 @@ const CanvasSettingsPanel: React.FC<{settings: any, setSettings: any, isRatioLoc
         if (file) {
             const reader = new FileReader();
             reader.onload = (event) => {
-                const result = event.target?.result;
+                // FIX: Cast event.target to FileReader to safely access result.
+                const result = (event.target as FileReader).result;
                 if (typeof result === 'string') {
                     setSettings((s: any) => ({...s, backgroundImage: result, backgroundType: 'image'}));
                 }
@@ -865,7 +868,8 @@ const ImageSettingsPanel: React.FC<{activeCellIndex: number, placedImages: Recor
             const file = files[0];
             const reader = new FileReader();
             reader.onload = (event) => setPlacedImages((prev: Record<number, PlacedImage>) => ({ ...prev, [singleFileRef.current!.cellIndex]: { src: event.target?.result as string, zoom: 1, offsetX: 0.5, offsetY: 0.5 }}));
-            reader.readAsDataURL(file);
+            // FIX: Cast file to Blob to ensure type compatibility with readAsDataURL.
+            reader.readAsDataURL(file as Blob);
         }
         e.target.value = ''; singleFileRef.current = null;
     };

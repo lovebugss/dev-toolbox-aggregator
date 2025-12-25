@@ -8,10 +8,10 @@ interface jwtDecoderState {
 }
 
 const JsonBlock: React.FC<{ title: string; data: object | null; error?: boolean }> = ({ title, data, error }) => (
-    <div>
-        <h3 className="text-lg font-semibold mb-2 text-text-primary dark:text-d-text-primary">{title}</h3>
-        <pre className={`p-4 bg-primary dark:bg-d-primary rounded-lg text-sm whitespace-pre-wrap break-all ${error ? 'text-red-500' : 'text-accent dark:text-d-accent'}`}>
-            <code>
+    <div className="space-y-2">
+        <h3 className="text-xs font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70 ml-2">{title}</h3>
+        <pre className={`p-4 bg-secondary dark:bg-slate-900 border border-border-color dark:border-white/10 rounded-2xl text-sm whitespace-pre-wrap break-all shadow-inner ${error ? 'text-red-500' : 'text-accent dark:text-indigo-300'}`}>
+            <code className="font-mono">
                 {data ? JSON.stringify(data, null, 2) : ''}
             </code>
         </pre>
@@ -66,31 +66,35 @@ const JwtDecoder: React.FC = () => {
               description={t('tools.jwtDecoder.pageDescription')}
             />
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 <div className="flex flex-col">
-                    <label htmlFor="jwt-input" className="font-semibold mb-2 text-text-secondary dark:text-d-text-secondary">{t('tools.jwtDecoder.encodedToken')}</label>
-                    <textarea
-                        id="jwt-input"
-                        value={jwt}
-                        onChange={(e) => setState({ jwt: e.target.value })}
-                        placeholder={t('tools.jwtDecoder.tokenPlaceholder') as string}
-                        className="flex-grow p-4 bg-secondary dark:bg-d-secondary border border-border-color dark:border-d-border-color rounded-lg text-text-primary dark:text-d-text-primary focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-d-accent font-mono text-sm resize-none"
-                        style={{minHeight: '200px'}}
-                    />
+                    <label htmlFor="jwt-input" className="text-[10px] font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70 mb-3 px-2">{t('tools.jwtDecoder.encodedToken')}</label>
+                    <div className="glass-panel rounded-[2rem] border-white/10 overflow-hidden">
+                        <textarea
+                            id="jwt-input"
+                            value={jwt}
+                            onChange={(e) => setState({ jwt: e.target.value })}
+                            placeholder={t('tools.jwtDecoder.tokenPlaceholder') as string}
+                            className="w-full min-h-[300px] p-6 bg-black/5 dark:bg-slate-900/50 border-none text-text-primary dark:text-d-text-primary focus:outline-none font-mono text-sm leading-relaxed resize-none placeholder:opacity-30"
+                            style={{minHeight: '400px'}}
+                        />
+                    </div>
                 </div>
-                <div className="space-y-6">
-                    <h3 className="text-xl font-bold text-text-primary dark:text-d-text-primary -mb-2">{t('tools.jwtDecoder.decoded')}</h3>
+                <div className="space-y-8">
+                    <h3 className="text-xl font-black text-text-primary dark:text-d-text-primary px-2 uppercase tracking-tighter">{t('tools.jwtDecoder.decoded')}</h3>
                     {decoded.error ? (
-                        <div className="p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md">{decoded.error}</div>
+                        <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-2xl text-xs font-mono">{decoded.error}</div>
                     ) : (
-                        <>
+                        <div className="space-y-6">
                             <JsonBlock title={t('tools.jwtDecoder.header')} data={decoded.header} />
                             <JsonBlock title={t('tools.jwtDecoder.payload')} data={decoded.payload} />
-                             <div>
-                                <h3 className="text-lg font-semibold mb-2 text-text-primary dark:text-d-text-primary">{t('tools.jwtDecoder.signature')}</h3>
-                                <p className="text-sm p-4 bg-primary dark:bg-d-primary rounded-lg text-text-secondary dark:text-d-text-secondary">{t('tools.jwtDecoder.signatureNotVerified')}</p>
+                             <div className="space-y-2">
+                                <h3 className="text-xs font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70 ml-2">{t('tools.jwtDecoder.signature')}</h3>
+                                <div className="p-4 bg-secondary dark:bg-slate-900/30 border border-dashed border-border-color dark:border-white/10 rounded-2xl text-xs text-text-secondary dark:text-d-text-secondary/50 italic leading-relaxed">
+                                    {t('tools.jwtDecoder.signatureNotVerified')}
+                                </div>
                              </div>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>

@@ -5,6 +5,7 @@ import * as xmljs from 'xml-js';
 import { useToolState } from '../contexts/ToolStateContext';
 import { useToasts } from '../contexts/ToastContext';
 import { ToolHeader } from '../components/ui/ToolHeader';
+import { CopyIcon, RefreshIcon } from '../components/icons/Icons';
 
 type Format = 'json' | 'yaml' | 'xml';
 const formats: Format[] = ['json', 'yaml', 'xml'];
@@ -24,17 +25,15 @@ const FormatSelector: React.FC<{
 }> = ({ label, selected, onSelect }) => {
   const { t } = useTranslation();
   return (
-    <div>
-      <h3 className="font-semibold mb-2 text-text-primary dark:text-d-text-primary">{label}</h3>
-      <div className="flex space-x-2 bg-secondary dark:bg-d-secondary p-1 rounded-lg border border-border-color dark:border-d-border-color">
+    <div className="flex flex-col gap-2">
+      <h3 className="text-[10px] font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70 ml-2">{label}</h3>
+      <div className="flex p-1 bg-secondary dark:bg-d-secondary rounded-xl border border-white/10 shadow-inner">
         {formats.map(format => (
           <button
             key={format}
             onClick={() => onSelect(format)}
-            className={`w-full px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${
-              selected === format
-                ? 'bg-primary dark:bg-d-primary text-accent dark:text-d-accent shadow'
-                : 'text-text-secondary dark:text-d-text-secondary hover:bg-primary/50 dark:hover:bg-d-primary/50'
+            className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${
+              selected === format ? 'bg-accent text-white shadow-md' : 'text-text-secondary dark:text-d-text-secondary hover:bg-white/5'
             }`}
           >
             {t(`tools.dataConverter.${format}`)}
@@ -62,105 +61,73 @@ const DataConverter: React.FC = () => {
       setState(s => ({ ...s, outputData: '', error: null }));
       return;
     }
-
     const convert = () => {
       try {
         let jsObject: any;
-
-        // 1. Parse input to JS Object
-        if (fromFormat === 'json') {
-          jsObject = JSON.parse(inputData);
-        } else if (fromFormat === 'yaml') {
+        if (fromFormat === 'json') jsObject = JSON.parse(inputData);
+        else if (fromFormat === 'yaml') {
           jsObject = yaml.load(inputData);
-           if (typeof jsObject === 'string' || typeof jsObject === 'number' || typeof jsObject === 'boolean' || jsObject === null) {
-                // Wrap primitives to handle them consistently
-                jsObject = { value: jsObject };
-            }
-        } else { // xml
-          jsObject = xmljs.xml2js(inputData, { compact: true });
-        }
+          if (typeof jsObject !== 'object') jsObject = { value: jsObject };
+        } else jsObject = xmljs.xml2js(inputData, { compact: true });
 
-        // 2. Stringify JS Object to output format
         let outputString: string;
-        if (toFormat === 'json') {
-          outputString = JSON.stringify(jsObject, null, 2);
-        } else if (toFormat === 'yaml') {
-          outputString = yaml.dump(jsObject);
-        } else { // xml
-          outputString = xmljs.js2xml(jsObject, { compact: true, spaces: 2 });
-        }
+        if (toFormat === 'json') outputString = JSON.stringify(jsObject, null, 2);
+        else if (toFormat === 'yaml') outputString = yaml.dump(jsObject);
+        else outputString = xmljs.js2xml(jsObject, { compact: true, spaces: 2 });
 
         setState(s => ({ ...s, outputData: outputString, error: null }));
       } catch (e: any) {
         setState(s => ({ ...s, outputData: '', error: t('tools.dataConverter.errorInvalidInput', { format: fromFormat.toUpperCase(), message: e.message }) }));
       }
     };
-
     const debounceTimeout = setTimeout(convert, 300);
     return () => clearTimeout(debounceTimeout);
   }, [inputData, fromFormat, toFormat, t, setState]);
   
   const handleCopy = () => {
     if (!outputData || error) return;
-    navigator.clipboard.writeText(outputData).then(() => {
-        addToast(t('common.toast.copiedSuccess'), 'success');
-    }, () => {
-        addToast(t('common.toast.copiedFailed'), 'error');
-    });
+    navigator.clipboard.writeText(outputData).then(() => addToast(t('common.toast.copiedSuccess'), 'success'));
   };
 
   const handleSwap = () => {
     if (error || !outputData) return;
-    setState(s => ({
-        ...s,
-        inputData: s.outputData,
-        fromFormat: s.toFormat,
-        toFormat: s.fromFormat,
-    }));
+    setState(s => ({ ...s, inputData: s.outputData, fromFormat: s.toFormat, toFormat: s.fromFormat }));
   };
   
   return (
-    <div>
-      <ToolHeader 
-        title={t('tools.dataConverter.pageTitle')}
-        description={t('tools.dataConverter.pageDescription')}
-      />
+    <div className="flex flex-col h-full">
+      <ToolHeader title={t('tools.dataConverter.pageTitle')} description={t('tools.dataConverter.pageDescription')} />
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
         <FormatSelector label={t('tools.dataConverter.from')} selected={fromFormat} onSelect={fmt => setState(s => ({ ...s, fromFormat: fmt }))} />
         <FormatSelector label={t('tools.dataConverter.to')} selected={toFormat} onSelect={fmt => setState(s => ({ ...s, toFormat: fmt }))} />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[calc(100vh-350px)]">
-        <div className="flex flex-col">
-          <label htmlFor="data-input" className="font-semibold mb-2 text-text-secondary dark:text-d-text-secondary">{t('tools.dataConverter.inputLabel')}</label>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 flex-grow min-h-0">
+        <div className="flex flex-col glass-panel rounded-[2rem] overflow-hidden border-white/10">
+          <label className="px-6 py-4 border-b border-white/10 text-[10px] font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70 bg-white/5">{t('tools.dataConverter.inputLabel')}</label>
           <textarea
-            id="data-input"
             value={inputData}
             onChange={(e) => setState(s => ({ ...s, inputData: e.target.value }))}
-            className="flex-grow p-4 bg-secondary dark:bg-d-secondary border border-border-color dark:border-d-border-color rounded-lg text-text-primary dark:text-d-text-primary focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-d-accent font-mono text-sm resize-none"
+            className="flex-grow p-6 bg-black/5 dark:bg-black/20 text-text-primary dark:text-d-text-primary focus:outline-none font-mono text-sm resize-none placeholder:opacity-30"
+            spellCheck="false"
           />
         </div>
-        <div className="flex flex-col">
-          <div className="flex justify-between items-center mb-2">
-            <label htmlFor="data-output" className="font-semibold text-text-secondary dark:text-d-text-secondary">{t('tools.dataConverter.outputLabel')}</label>
-            <div className="flex space-x-2">
-                 <button onClick={handleSwap} title={t('common.tooltips.swapConversion')} className="px-3 py-1 text-sm bg-border-color dark:bg-d-border-color rounded-md text-text-secondary hover:bg-gray-300 dark:hover:bg-gray-600">
-                    {t('tools.dataConverter.swapButton')}
-                </button>
-                <button onClick={handleCopy} title={t('common.tooltips.copyOutput')} className="px-3 py-1 text-sm bg-border-color dark:bg-d-border-color rounded-md text-text-secondary hover:bg-gray-300 dark:hover:bg-gray-600">
-                    {t('common.copy')}
-                </button>
+        <div className="flex flex-col glass-panel rounded-[2rem] overflow-hidden border-white/10">
+          <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center bg-white/5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70">{t('tools.dataConverter.outputLabel')}</label>
+            <div className="flex gap-2">
+                 <button onClick={handleSwap} title={t('common.tooltips.swapConversion')} className="p-1.5 hover:bg-white/10 rounded-lg text-accent transition-colors"><RefreshIcon className="w-4 h-4 transform rotate-90"/></button>
+                 <button onClick={handleCopy} title={t('common.tooltips.copyOutput')} className="p-1.5 hover:bg-white/10 rounded-lg text-accent transition-colors"><CopyIcon className="w-4 h-4"/></button>
             </div>
           </div>
-          <div className="flex-grow p-4 bg-secondary dark:bg-d-secondary border border-border-color dark:border-d-border-color rounded-lg overflow-auto relative">
-             {error && <div className="p-4 bg-red-900/50 border border-red-700 text-red-300 rounded-md whitespace-pre-wrap font-mono text-xs">{error}</div>}
-             {!error && outputData && (
-                <pre className="text-sm text-text-primary dark:text-d-text-primary whitespace-pre-wrap">
-                    <code className="font-mono">{outputData}</code>
-                </pre>
+          <div className="flex-grow p-6 bg-black/5 dark:bg-black/20 overflow-auto relative">
+             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 text-red-500 rounded-xl text-xs font-mono leading-relaxed">{error}</div>}
+             {!error && outputData ? (
+                <pre className="text-sm text-text-primary dark:text-d-text-primary whitespace-pre-wrap font-mono leading-relaxed">{outputData}</pre>
+             ) : !error && (
+                <div className="text-text-secondary dark:text-d-text-secondary/30 italic text-sm">{t('tools.dataConverter.outputPlaceholder')}</div>
              )}
-             {!error && !outputData && <div className="text-text-secondary dark:text-d-text-secondary">{t('tools.dataConverter.outputPlaceholder')}</div>}
           </div>
         </div>
       </div>

@@ -17,7 +17,7 @@ export type ToolId =
   // PDF
   | 'pdf-splitter' | 'pdf-merger' | 'pdf-watermark' | 'pdf-compressor'
   // Creative
-  | 'meme-generator' | 'image-editor' | 'image-collage' | 'led-scroller' | 'coding-slacker' | 'ascii-art-generator' | 'svg-shape-generator'
+  | 'meme-generator' | 'image-editor' | 'image-collage' | 'led-scroller' | 'coding-slacker' | 'ascii-art-generator' | 'svg-shape-generator' | 'chart-generator'
   // Math
   | 'calculator' | 'number-base-converter' | 'algorithm-visualizer'
   // Convenience
@@ -86,6 +86,7 @@ export const toolCategories: ToolCategory[] = [
   {
     nameKey: 'sidebar.categories.creative',
     tools: [
+      { id: 'chart-generator', nameKey: 'tools.chartGenerator.name', descriptionKey: 'tools.chartGenerator.description', icon: BarChartIcon },
       { id: 'meme-generator', nameKey: 'tools.memeGenerator.name', descriptionKey: 'tools.memeGenerator.description', icon: SmileyIcon },
       { id: 'image-editor', nameKey: 'tools.imageEditor.name', descriptionKey: 'tools.imageEditor.description', icon: EditIcon },
       { id: 'image-collage', nameKey: 'tools.imageCollage.name', descriptionKey: 'tools.imageCollage.description', icon: LayoutIcon },

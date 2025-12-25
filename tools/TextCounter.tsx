@@ -40,20 +40,22 @@ const TextCounter: React.FC = () => {
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
                 {statCards.map(stat => (
-                    <div key={stat.label} className="p-6 bg-secondary dark:bg-d-secondary ring-1 ring-inset ring-border-color dark:ring-d-border-color rounded-xl text-center shadow-sm">
-                        <p className="text-base text-text-secondary dark:text-d-text-secondary">{stat.label}</p>
-                        <p className="text-4xl font-bold text-accent dark:text-d-accent mt-1">{stat.value}</p>
+                    <div key={stat.label} className="p-6 glass-panel rounded-2xl text-center border-white/10 hover:scale-[1.02] transition-transform duration-500">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-secondary dark:text-d-text-secondary/70">{stat.label}</p>
+                        <p className="text-4xl font-black text-accent dark:text-indigo-400 mt-2 tracking-tighter">{stat.value}</p>
                     </div>
                 ))}
             </div>
             
-            <textarea
-                value={text}
-                onChange={(e) => setState({ text: e.target.value })}
-                placeholder={t('tools.textCounter.placeholder') as string}
-                aria-label={t('tools.textCounter.pageTitle')}
-                className="w-full h-96 p-4 bg-secondary dark:bg-d-secondary border-none ring-1 ring-inset ring-border-color dark:ring-d-border-color rounded-xl text-text-primary dark:text-d-text-primary focus:outline-none focus:ring-2 focus:ring-accent dark:focus:ring-d-accent text-base resize-y shadow-sm"
-            />
+            <div className="relative glass-panel rounded-[2rem] border-white/10 overflow-hidden">
+                <textarea
+                    value={text}
+                    onChange={(e) => setState({ text: e.target.value })}
+                    placeholder={t('tools.textCounter.placeholder') as string}
+                    aria-label={t('tools.textCounter.pageTitle')}
+                    className="w-full h-96 p-6 bg-black/5 dark:bg-slate-900/50 border-none text-text-primary dark:text-d-text-primary focus:outline-none focus:ring-0 text-lg leading-relaxed resize-y placeholder:opacity-30"
+                />
+            </div>
         </div>
     );
 };

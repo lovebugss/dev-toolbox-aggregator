@@ -63,6 +63,7 @@ import PdfMerger from './tools/PdfMerger';
 import PdfWatermark from './tools/PdfWatermark';
 import PdfCompressor from './tools/PdfCompressor';
 import HttpClient from './tools/HttpClient';
+import ChartGenerator from './tools/ChartGenerator';
 
 export const FullScreenContext = createContext<{
     isFullScreen: boolean;
@@ -136,6 +137,7 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'pdf-watermark': PdfWatermark,
   'pdf-compressor': PdfCompressor,
   'http-client': HttpClient,
+  'chart-generator': ChartGenerator,
 };
 
 const useMediaQuery = (query: string) => {
