@@ -87,7 +87,7 @@ const PdfToPng: React.FC = () => {
 
                 const loadingTask = window.pdfjsLib.getDocument({
                     data: arrayBuffer,
-                    cMapUrl: '/cmaps/',
+                    cMapUrl: '/dev-toolbox-aggregator/cmaps/',
                     cMapPacked: true,
                 });
 
