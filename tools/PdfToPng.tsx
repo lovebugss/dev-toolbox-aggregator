@@ -52,7 +52,12 @@ const PdfToPng: React.FC = () => {
         reader.onload = async (e) => {
             try {
                 const arrayBuffer = e.target?.result as ArrayBuffer;
-                const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+                // FIX: Added cMapUrl and cMapPacked to correctly load character maps for fonts (like CJK fonts).
+                const loadingTask = window.pdfjsLib.getDocument({ 
+                    data: arrayBuffer,
+                    cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+                    cMapPacked: true,
+                });
                 const pdf = await loadingTask.promise;
                 
                 setProgress({ current: 0, total: pdf.numPages });
