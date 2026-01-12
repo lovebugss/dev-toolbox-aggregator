@@ -34,7 +34,8 @@
     "diff": "^8.0.2",
     "i18next": "^25.7.3",
     "recharts": "^2.15.0",
-    "opencc-js": "^1.0.5"
+    "opencc-js": "^1.0.5",
+    "vite-plugin-static-copy": "^3.1.4"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
