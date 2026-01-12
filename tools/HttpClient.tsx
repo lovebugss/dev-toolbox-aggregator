@@ -1,9 +1,9 @@
 import React, { useState, useCallback, useMemo, useContext } from 'react';
+// FIX: Corrected import of useTranslation from react-i18next.
 import { useTranslation } from 'react-i18next';
 import { useToolState } from '../contexts/ToolStateContext';
 import { useToasts } from '../contexts/ToastContext';
 import { ToolHeader } from '../components/ui/ToolHeader';
-import { LabeledControl } from '../components/ui/LabeledControl';
 import { Accordion } from '../components/ui/Accordion';
 import { CopyIcon, TrashIcon, RefreshIcon } from '../components/icons/Icons';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
@@ -48,6 +48,7 @@ const HttpClient: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [response, setResponse] = useState<ResponseData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [activeResponseTab, setActiveResponseTab] = useState<'body' | 'headers'>('body');
 
     const set = <K extends keyof HttpClientState>(key: K, value: HttpClientState[K]) => {
         setState(s => ({ ...s, [key]: value }));
@@ -75,6 +76,7 @@ const HttpClient: React.FC = () => {
                 status: res.status, statusText: res.statusText, headers: resHeaders, body: displayBody,
                 time: Math.round(endTime - startTime), size: (new Blob([bodyText]).size / 1024).toFixed(2) + ' KB',
             });
+            setActiveResponseTab('body');
         } catch (err) {
             setError((err as Error).message);
             addToast(t('tools.httpClient.corsHint'), 'error');
@@ -161,15 +163,34 @@ const HttpClient: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col glass-panel rounded-[2rem] overflow-hidden border-white/10 min-h-[400px]">
-                        <div className="p-4 border-b border-white/10 bg-white/5 flex items-center justify-between">
-                            <h3 className="text-xs font-black uppercase tracking-widest text-text-primary dark:text-d-text-primary">{t('tools.httpClient.response')}</h3>
+                        <div className="p-4 border-b border-white/10 bg-white/5 flex flex-col gap-4">
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-text-primary dark:text-d-text-primary">{t('tools.httpClient.response')}</h3>
+                                {response && (
+                                    <div className="flex items-center gap-4 text-[10px] font-bold">
+                                        <span className={`px-2 py-0.5 rounded ${response.status < 300 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                                            {response.status} {response.statusText}
+                                        </span>
+                                        <span className="text-text-secondary">{response.time} ms</span>
+                                        <span className="text-text-secondary">{response.size}</span>
+                                    </div>
+                                )}
+                            </div>
+                            
                             {response && (
-                                <div className="flex items-center gap-4 text-[10px] font-bold">
-                                    <span className={`px-2 py-0.5 rounded ${response.status < 300 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
-                                        {response.status} {response.statusText}
-                                    </span>
-                                    <span className="text-text-secondary">{response.time} ms</span>
-                                    <span className="text-text-secondary">{response.size}</span>
+                                <div className="flex gap-4">
+                                    <button 
+                                        onClick={() => setActiveResponseTab('body')}
+                                        className={`pb-1 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${activeResponseTab === 'body' ? 'text-accent border-accent' : 'text-text-secondary/50 border-transparent hover:text-text-secondary'}`}
+                                    >
+                                        {t('tools.httpClient.responseBody')}
+                                    </button>
+                                    <button 
+                                        onClick={() => setActiveResponseTab('headers')}
+                                        className={`pb-1 text-[10px] font-black uppercase tracking-widest border-b-2 transition-all ${activeResponseTab === 'headers' ? 'text-accent border-accent' : 'text-text-secondary/50 border-transparent hover:text-text-secondary'}`}
+                                    >
+                                        {t('tools.httpClient.responseHeaders')}
+                                    </button>
                                 </div>
                             )}
                         </div>
@@ -181,25 +202,29 @@ const HttpClient: React.FC = () => {
                             ) : error ? (
                                 <div className="p-4 bg-red-500/5 text-red-500 rounded-xl text-xs font-mono border border-red-500/10 leading-relaxed">{error}</div>
                             ) : response ? (
-                                <div className="space-y-6">
-                                    <div className="relative group">
-                                        <button onClick={() => navigator.clipboard.writeText(response.body).then(() => addToast(t('common.toast.copiedSuccess'), 'success'))} className="absolute top-0 right-0 p-2 bg-white/10 opacity-0 group-hover:opacity-100 rounded-bl-xl transition-opacity text-accent"><CopyIcon className="w-4 h-4"/></button>
-                                        <SyntaxHighlighter language="json" style={theme === 'dark' ? vscDarkPlus : vs} customStyle={{ margin: 0, background: 'transparent', fontSize: '0.75rem', lineHeight: '1.4' }}>
-                                            {response.body}
-                                        </SyntaxHighlighter>
-                                    </div>
-                                    <div className="pt-4 border-t border-white/5">
-                                        <h4 className="text-[10px] font-black uppercase text-text-secondary/50 mb-3 tracking-widest">{t('tools.httpClient.headers')}</h4>
+                                <>
+                                    {activeResponseTab === 'body' && (
+                                        <div className="relative group">
+                                            {/* FIX: Cast v to string for writeText compatibility. */}
+                                            <button onClick={() => navigator.clipboard.writeText(response.body).then(() => addToast(t('common.toast.copiedSuccess'), 'success'))} className="absolute top-0 right-0 p-2 bg-white/10 opacity-0 group-hover:opacity-100 rounded-bl-xl transition-opacity text-accent"><CopyIcon className="w-4 h-4"/></button>
+                                            <SyntaxHighlighter language="json" style={theme === 'dark' ? vscDarkPlus : vs} customStyle={{ margin: 0, background: 'transparent', fontSize: '0.75rem', lineHeight: '1.4' }}>
+                                                {response.body}
+                                            </SyntaxHighlighter>
+                                        </div>
+                                    )}
+                                    {activeResponseTab === 'headers' && (
                                         <div className="space-y-1 font-mono text-[10px]">
                                             {Object.entries(response.headers).map(([k, v]) => (
-                                                <div key={k} className="flex border-b border-white/5 py-1.5">
+                                                <div key={k} className="flex border-b border-white/5 py-1.5 hover:bg-white/5 transition-colors rounded px-2 group">
                                                     <span className="text-accent font-bold w-1/3 truncate">{k}:</span>
                                                     <span className="text-text-primary dark:text-d-text-primary flex-1 break-all px-2">{v}</span>
+                                                    {/* FIX: Cast v to string for writeText compatibility. */}
+                                                    <button onClick={() => { navigator.clipboard.writeText(v as string); addToast(t('common.toast.copiedSuccess'), 'success'); }} className="opacity-0 group-hover:opacity-100 transition-opacity ml-auto"><CopyIcon className="w-3 h-3 text-text-secondary"/></button>
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="h-full flex items-center justify-center text-text-secondary dark:text-d-text-secondary/20 text-xs italic text-center px-8 uppercase tracking-widest">{t('tools.httpClient.noResponse')}</div>
                             )}

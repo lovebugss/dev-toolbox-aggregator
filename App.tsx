@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useCallback, createContext, useRef } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import TopNav from './components/Sidebar';
@@ -21,6 +22,8 @@ import CrontabGenerator from './tools/CrontabGenerator';
 import UuidGenerator from './tools/UuidGenerator';
 import DataConverter from './tools/DataConverter';
 import TimestampConverter from './tools/TimestampConverter';
+import TimeDiffCalculator from './tools/TimeDiffCalculator';
+import TimezoneConverter from './tools/TimezoneConverter';
 import Calculator from './tools/Calculator';
 import VideoToGif from './tools/VideoToGif';
 import { ImageGridSplitter } from './tools/ImageGridSplitter';
@@ -55,6 +58,7 @@ import JsonToJavaBean from './tools/JsonToJavaBean';
 import StreamBroadcaster from './tools/StreamBroadcaster';
 import CommitMessageGenerator from './tools/CommitMessageGenerator';
 import ExcelToJson from './tools/ExcelToJson';
+import MarkdownToExcel from './tools/MarkdownToExcel';
 import DicomViewer from './tools/DicomViewer';
 import PdfToPng from './tools/PdfToPng';
 import LongImageStitcher from './tools/LongImageStitcher';
@@ -64,6 +68,7 @@ import PdfWatermark from './tools/PdfWatermark';
 import PdfCompressor from './tools/PdfCompressor';
 import HttpClient from './tools/HttpClient';
 import ChartGenerator from './tools/ChartGenerator';
+import ChineseConverter from './tools/ChineseConverter';
 
 export const FullScreenContext = createContext<{
     isFullScreen: boolean;
@@ -97,6 +102,8 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'data-converter': DataConverter,
   'dicom-viewer': DicomViewer,
   'timestamp-converter': TimestampConverter,
+  'time-diff-calculator': TimeDiffCalculator,
+  'timezone-converter': TimezoneConverter,
   'calculator': Calculator,
   'video-to-gif': VideoToGif,
   'image-grid-splitter': ImageGridSplitter,
@@ -130,6 +137,7 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'stream-broadcaster': StreamBroadcaster,
   'commit-message-generator': CommitMessageGenerator,
   'excel-to-json': ExcelToJson,
+  'markdown-to-excel': MarkdownToExcel,
   'pdf-to-png': PdfToPng,
   'long-image-stitcher': LongImageStitcher,
   'pdf-splitter': PdfSplitter,
@@ -138,6 +146,7 @@ const toolComponentMap: Record<ToolId, React.ComponentType> = {
   'pdf-compressor': PdfCompressor,
   'http-client': HttpClient,
   'chart-generator': ChartGenerator,
+  'chinese-converter': ChineseConverter,
 };
 
 const useMediaQuery = (query: string) => {
@@ -155,7 +164,6 @@ const useMediaQuery = (query: string) => {
 };
 
 const AppContent: React.FC = () => {
-    // 同步初始化主题状态，确保与 index.html 的脚本一致
     const [theme, setTheme] = useState(() => {
         if (typeof window !== 'undefined') {
             return localStorage.getItem('theme') || 'dark';

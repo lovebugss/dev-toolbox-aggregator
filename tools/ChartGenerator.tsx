@@ -2,7 +2,7 @@ import React, { useState, useMemo, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, AreaChart, Area,
-  ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell
+  ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell, Label
 } from 'recharts';
 import { useToolState } from '../contexts/ToolStateContext';
 import { ToolHeader } from '../components/ui/ToolHeader';
@@ -19,6 +19,11 @@ interface ChartState {
     yAxisKeys: string[];
     title: string;
     themeColors: string[];
+    showXAxis: boolean;
+    showYAxis: boolean;
+    showGrid: boolean;
+    xAxisLabel: string;
+    yAxisLabel: string;
 }
 
 const THEME_PRESETS = [
@@ -48,9 +53,14 @@ const ChartGenerator: React.FC = () => {
         yAxisKeys: ['revenue', 'profit'],
         title: 'Monthly Performance',
         themeColors: THEME_PRESETS[0],
+        showXAxis: true,
+        showYAxis: true,
+        showGrid: true,
+        xAxisLabel: 'Month',
+        yAxisLabel: 'Value',
     });
 
-    const { rawData, chartType, xAxisKey, yAxisKeys, title, themeColors } = state;
+    const { rawData, chartType, xAxisKey, yAxisKeys, title, themeColors, showXAxis, showYAxis, showGrid, xAxisLabel, yAxisLabel } = state;
 
     const parsedData = useMemo(() => {
         const trimmed = rawData.trim();
@@ -100,7 +110,6 @@ const ChartGenerator: React.FC = () => {
         const ctx = canvas.getContext('2d');
         const img = new Image();
         
-        // Increase resolution for the download
         const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(svgBlob);
 
@@ -125,6 +134,35 @@ const ChartGenerator: React.FC = () => {
         img.src = url;
     }, [title]);
 
+    const renderAxis = () => (
+        <>
+            {showGrid && <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />}
+            <XAxis 
+                dataKey={xAxisKey} 
+                stroke="#94A3B8" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                hide={!showXAxis}
+            >
+                {xAxisLabel && <Label value={xAxisLabel} offset={-10} position="insideBottom" fill="#64748B" fontSize={10} fontWeight="bold" />}
+            </XAxis>
+            <YAxis 
+                stroke="#94A3B8" 
+                fontSize={12} 
+                tickLine={false} 
+                axisLine={false} 
+                hide={!showYAxis}
+            >
+                {yAxisLabel && <Label value={yAxisLabel} angle={-90} position="insideLeft" offset={10} style={{ textAnchor: 'middle', fill: '#64748B', fontSize: 10, fontWeight: 'bold' }} />}
+            </YAxis>
+            <Tooltip 
+                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)' }}
+            />
+            <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+        </>
+    );
+
     const renderChart = () => {
         if (!parsedData || parsedData.length === 0) {
             return (
@@ -138,20 +176,8 @@ const ChartGenerator: React.FC = () => {
             width: '100%',
             height: '100%',
             data: parsedData,
-            margin: { top: 20, right: 30, left: 20, bottom: 20 },
+            margin: { top: 20, right: 30, left: 30, bottom: 20 },
         };
-
-        const renderAxis = () => (
-            <>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis dataKey={xAxisKey} stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} axisLine={false} />
-                <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', backgroundColor: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(10px)' }}
-                />
-                <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
-            </>
-        );
 
         switch (chartType) {
             case 'bar':
@@ -301,6 +327,33 @@ const ChartGenerator: React.FC = () => {
                                 </div>
                             </LabeledControl>
                         </div>
+
+                        <Accordion title={t('tools.chartGenerator.axesAndGrid')}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4">
+                                    <label className="flex items-center gap-2 text-xs font-bold text-text-secondary dark:text-d-text-secondary cursor-pointer">
+                                        <input type="checkbox" checked={showXAxis} onChange={e => setState(s => ({...s, showXAxis: e.target.checked}))} className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent" />
+                                        {t('tools.chartGenerator.showXAxis')}
+                                    </label>
+                                    <label className="flex items-center gap-2 text-xs font-bold text-text-secondary dark:text-d-text-secondary cursor-pointer">
+                                        <input type="checkbox" checked={showYAxis} onChange={e => setState(s => ({...s, showYAxis: e.target.checked}))} className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent" />
+                                        {t('tools.chartGenerator.showYAxis')}
+                                    </label>
+                                    <label className="flex items-center gap-2 text-xs font-bold text-text-secondary dark:text-d-text-secondary cursor-pointer">
+                                        <input type="checkbox" checked={showGrid} onChange={e => setState(s => ({...s, showGrid: e.target.checked}))} className="w-4 h-4 rounded text-accent focus:ring-accent accent-accent" />
+                                        {t('tools.chartGenerator.showGrid')}
+                                    </label>
+                                </div>
+                                <div className="space-y-4">
+                                    <LabeledControl label={t('tools.chartGenerator.xAxisLabel')}>
+                                        <input type="text" value={xAxisLabel} onChange={e => setState(s => ({...s, xAxisLabel: e.target.value}))} className="w-full p-2 bg-primary/50 dark:bg-slate-800 border border-border-color dark:border-white/10 rounded-lg text-xs" />
+                                    </LabeledControl>
+                                    <LabeledControl label={t('tools.chartGenerator.yAxisLabel')}>
+                                        <input type="text" value={yAxisLabel} onChange={e => setState(s => ({...s, yAxisLabel: e.target.value}))} className="w-full p-2 bg-primary/50 dark:bg-slate-800 border border-border-color dark:border-white/10 rounded-lg text-xs" />
+                                    </LabeledControl>
+                                </div>
+                            </div>
+                        </Accordion>
 
                         <LabeledControl label={t('tools.chartGenerator.colors')}>
                             <div className="flex gap-3">
