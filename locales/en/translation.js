@@ -50,6 +50,28 @@ export default {
     "servedCount": "Times Served"
   },
   "tools": {
+    "chineseConverter": {
+      "name": "Chinese Converter",
+      "description": "Convert between Simplified and Traditional Chinese characters.",
+      "pageTitle": "Simplified & Traditional Chinese Converter",
+      "pageDescription": "Convert Chinese characters between various variants including Simplified, Traditional, Taiwan, and Hong Kong styles.",
+      "inputLabel": "Input Content",
+      "outputLabel": "Conversion Result",
+      "placeholder": "Type or paste Chinese text here...",
+      "autoConvert": "Auto Convert",
+      "swap": "Swap Content",
+      "clear": "Clear",
+      "variants": {
+        "s2t": "S -> T (Simplified to Traditional)",
+        "t2s": "T -> S (Traditional to Simplified)",
+        "s2tw": "S -> TW (Simplified to Taiwan)",
+        "tw2s": "TW -> S (Taiwan to Simplified)",
+        "s2hk": "S -> HK (Simplified to Hong Kong)",
+        "hk2s": "HK -> S (Hong Kong to Simplified)",
+        "s2twp": "S -> TW (with Phrases)",
+        "t2tw": "T -> TW (Traditional to Taiwan)"
+      }
+    },
     "chartGenerator": {
       "name": "Chart Generator",
       "description": "Create beautiful charts from CSV or JSON data instantly.",
@@ -70,7 +92,13 @@ export default {
       "placeholder": "Paste CSV or JSON array here...",
       "invalidData": "Invalid data format. Please provide a valid JSON array or CSV.",
       "noData": "No data available to plot.",
-      "download": "Download PNG"
+      "download": "Download PNG",
+      "axesAndGrid": "Axes & Grid",
+      "showXAxis": "Show X-Axis",
+      "showYAxis": "Show Y-Axis",
+      "showGrid": "Show Grid Lines",
+      "xAxisLabel": "X-Axis Label",
+      "yAxisLabel": "Y-Axis Label"
     },
     "svgShapeGenerator": {
       "name": "SVG Shape Generator",
@@ -497,9 +525,7 @@ export default {
       "pageDescription": "Convert data between popular formats. The conversion happens automatically as you type.",
       "from": "From",
       "to": "To",
-      "json": "JSON",
-      "yaml": "YAML",
-      "xml": "XML",
+      "json": "JSON", "yaml": "YAML", "xml": "XML",
       "inputLabel": "Input",
       "outputLabel": "Output",
       "outputPlaceholder": "Conversion result will appear here.",
@@ -525,6 +551,28 @@ export default {
       "now": "Use Current Time",
       "errorInvalidTimestamp": "Invalid timestamp. Please enter only digits.",
       "errorInvalidDate": "Invalid date format."
+    },
+    "timeDiffCalculator": {
+      "name": "Time Difference",
+      "description": "Calculate the duration between two dates and times.",
+      "pageTitle": "Time Difference Calculator",
+      "pageDescription": "Enter two dates to see the precise duration between them in multiple units.",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "calculate": "Calculate Difference",
+      "result": "Difference Result",
+      "totalDays": "Total Days",
+      "precise": "Precise Duration"
+    },
+    "timezoneConverter": {
+      "name": "Timezone Converter",
+      "description": "Convert local time to any global timezone instantly.",
+      "pageTitle": "Global Timezone Converter",
+      "pageDescription": "Select a target timezone to convert your local time or a specific input time.",
+      "sourceTime": "Source Time",
+      "targetTimezone": "Target Timezone",
+      "convertedTime": "Converted Time",
+      "local": "Local Time"
     },
     "calculator": {
       "name": "Calculator",
