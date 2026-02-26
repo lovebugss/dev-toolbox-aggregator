@@ -1,238 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dev Toolbox Aggregator</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-      // 核心防闪烁脚本：在 DOM 解析前应用主题
-      (function() {
-        try {
-          var theme = localStorage.getItem('theme') || 'dark';
-          document.documentElement.classList.add(theme);
-          document.documentElement.style.colorScheme = theme;
-        } catch (e) {}
-      })();
-    </script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              'primary': '#F8FAFC',
-              'secondary': 'rgba(255, 255, 255, 0.4)',
-              'accent': '#4f46e5',
-              'd-primary': '#020617',
-              'd-secondary': 'rgba(15, 23, 42, 0.8)',
-              'text-primary': '#111827',
-              'text-secondary': '#4B5563',
-              'd-text-primary': '#F8FAFC',
-              'd-text-secondary': '#94A3B8',
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dev Toolbox Aggregator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.classList.add(theme);
+        document.documentElement.style.colorScheme = theme;
+      } catch (e) { }
+    })();
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            'primary': '#F1F5F9',
+            'secondary': 'rgba(255, 255, 255, 0.5)',
+            'accent': '#6366F1',
+            'd-primary': '#020617',
+            'd-secondary': 'rgba(15, 23, 42, 0.6)',
+            'text-primary': '#0F172A',
+            'text-secondary': '#475569',
+            'd-text-primary': '#F8FAFC',
+            'd-text-secondary': '#94A3B8',
+            'border-color': 'rgba(255, 255, 255, 0.4)',
+            'd-border-color': 'rgba(255, 255, 255, 0.08)',
+          },
+          animation: {
+            'blob': 'blob 20s infinite linear',
+            'aurora-1': 'aurora 25s infinite ease-in-out',
+            'aurora-2': 'aurora 30s infinite ease-in-out reverse',
+            'aurora-3': 'aurora 22s infinite ease-in-out',
+            'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+          },
+          keyframes: {
+            blob: {
+              '0%': { transform: 'translate(0px, 0px) scale(1)' },
+              '33%': { transform: 'translate(100px, -150px) scale(1.2)' },
+              '66%': { transform: 'translate(-80px, 50px) scale(0.8)' },
+              '100%': { transform: 'translate(0px, 0px) scale(1)' },
             },
-            animation: {
-              'blob': 'blob 20s infinite linear',
-              'aurora-1': 'aurora 25s infinite ease-in-out',
-              'aurora-2': 'aurora 30s infinite ease-in-out reverse',
-              'aurora-3': 'aurora 22s infinite ease-in-out',
-              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'holographic': 'holographic 8s ease infinite',
-            },
-            keyframes: {
-              blob: {
-                '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                '33%': { transform: 'translate(100px, -150px) scale(1.2)' },
-                '66%': { transform: 'translate(-80px, 50px) scale(0.8)' },
-                '100%': { transform: 'translate(0px, 0px) scale(1)' },
-              },
-              aurora: {
-                '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
-                '25%': { transform: 'translate(10%, 15%) scale(1.1)' },
-                '50%': { transform: 'translate(-5%, 20%) scale(0.9)' },
-                '75%': { transform: 'translate(-15%, -10%) scale(1.05)' }
-              },
-              holographic: {
-                '0%, 100%': { backgroundPosition: '0% 50%' },
-                '50%': { backgroundPosition: '100% 50%' }
-              }
+            aurora: {
+              '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+              '25%': { transform: 'translate(10%, 15%) scale(1.15)' },
+              '50%': { transform: 'translate(-5%, 20%) scale(0.95)' },
+              '75%': { transform: 'translate(-15%, -10%) scale(1.05)' }
             }
           }
         }
       }
-    </script>
-    <style>
-      body {
-        font-family: 'Inter', sans-serif;
-        overflow-x: hidden;
-        background-attachment: fixed;
-      }
-      
-      /* 全局玻璃质感基础 */
-      .glass-panel {
-        background: rgba(255, 255, 255, 0.65);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.4);
-        box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.05);
-      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
 
-      .dark .glass-panel {
-        background: rgba(15, 23, 42, 0.75);
-        border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-      }
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+    }
 
-      /* 首页卡片样式：优化性能防止闪烁 */
-      .glass-card {
-        background: rgba(255, 255, 255, 0.7);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(0, 0, 0, 0.05);
-        transform: translateZ(0);
-        backface-visibility: hidden;
-        will-change: transform, box-shadow;
-        /* 细化过渡属性，避免 all 带来的全量重绘 */
-        transition: 
-          transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
-          box-shadow 0.5s cubic-bezier(0.23, 1, 0.32, 1),
-          background-color 0.3s ease,
-          border-color 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        --mx: -1000px;
-        --my: -1000px;
-      }
+    .dark .glass-panel {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+    }
 
-      .glass-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          600px circle at var(--mx) var(--my),
-          rgba(255, 255, 255, 0.4),
-          transparent 40%
-        );
-        opacity: 0;
-        transition: opacity 0.4s ease;
-        z-index: 5;
-        pointer-events: none;
-      }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(12px) saturate(180%);
+      -webkit-backdrop-filter: blur(12px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      position: relative;
+      overflow: hidden;
+    }
 
-      .glass-card:hover::before {
-        opacity: 1;
-      }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
 
-      .glass-card:hover {
-        background: rgba(255, 255, 255, 1);
-        border: 1px solid rgba(79, 70, 229, 0.2);
-        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-        transform: translateY(-8px) scale(1.02);
-      }
+    .glass-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: 0 25px 50px -12px rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+    }
 
-      .dark .glass-card {
-        background: rgba(30, 41, 59, 0.5); 
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.7);
-      }
+    .dark .glass-card:hover {
+      background: rgba(30, 41, 59, 0.7);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
 
-      .dark .glass-card::after {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: radial-gradient(
-          800px circle at var(--mx) var(--my),
-          rgba(255, 255, 255, 0.08),
-          rgba(168, 85, 247, 0.05) 20%,
-          rgba(79, 70, 229, 0.03) 40%,
-          transparent 60%
-        );
-        opacity: 0;
-        mix-blend-mode: color-dodge;
-        transition: opacity 0.5s ease;
-        z-index: 1;
-        pointer-events: none;
-      }
+    .grid-bg {
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(99, 102, 241, 0.05) 1px, transparent 0);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, #000 40%, transparent 100%);
+    }
 
-      .dark .glass-card:hover::after {
-        opacity: 1;
-      }
+    .dark .grid-bg {
+      background-image:
+        radial-gradient(circle at 1px 1px, rgba(139, 92, 246, 0.1) 1px, transparent 0);
+    }
 
-      .dark .glass-card:hover {
-        background: rgba(30, 41, 59, 0.8);
-        border: 1px solid rgba(139, 92, 246, 0.4); 
-        box-shadow: 
-          0 0 30px -5px rgba(79, 70, 229, 0.3),
-          0 10px 40px -5px rgba(168, 85, 247, 0.2);
-      }
+    .aurora-blob {
+      position: absolute;
+      filter: blur(120px);
+      opacity: 0.3;
+      mix-blend-mode: soft-light;
+      pointer-events: none;
+    }
 
-      .grid-bg {
-        background-image: 
-          linear-gradient(rgba(79, 70, 229, 0.05) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(79, 70, 229, 0.05) 1px, transparent 1px);
-        background-size: 60px 60px;
-        mask-image: radial-gradient(ellipse 60% 60% at 50% 50%, #000 30%, transparent 100%);
-        pointer-events: none;
-      }
-      .dark .grid-bg {
-        background-image: 
-          linear-gradient(rgba(139, 92, 246, 0.1) 1px, transparent 1px),
-          linear-gradient(90deg, rgba(139, 92, 246, 0.1) 1px, transparent 1px);
-      }
+    .dark .aurora-blob {
+      opacity: 0.15;
+      mix-blend-mode: screen;
+    }
 
-      .vignette {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        pointer-events: none;
-        background: radial-gradient(circle at center, transparent 20%, rgba(0,0,0,0.03) 100%);
-      }
-      .dark .vignette {
-        background: radial-gradient(circle at center, transparent 30%, rgba(2, 6, 23, 0.6) 100%);
-      }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
 
-      .noise-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        opacity: 0.04;
-        pointer-events: none;
-        background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-      }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
 
-      .blob-bg {
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        z-index: -2;
-        overflow: hidden;
-        pointer-events: none;
-      }
-      
-      .aurora-blob {
-        position: absolute;
-        filter: blur(100px);
-        opacity: 0.35;
-        mix-blend-mode: soft-light;
-      }
-      .dark .aurora-blob {
-        opacity: 0.2;
-        mix-blend-mode: screen;
-      }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(156, 163, 175, 0.3);
+      border-radius: 10px;
+    }
 
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: transparent; }
-      ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.4); border-radius: 10px; }
-      .dark ::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.4); }
+    .dark ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.1);
+    }
 
-      /* 防止菜单闪烁的辅助类 */
-      .no-transition {
-        transition: none !important;
-      }
-    </style>
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.4);
+    }
+
+    pre,
+    code {
+      font-family: 'JetBrains Mono', monospace !important;
+    }
+  </style>
   <script type="importmap">
 {
   "imports": {
@@ -263,32 +199,31 @@
     "ua-parser-js": "https://esm.sh/ua-parser-js@^2.0.7",
     "diff": "https://esm.sh/diff@^8.0.2",
     "i18next": "https://esm.sh/i18next@^25.7.3",
-    "recharts": "https://esm.sh/recharts@^2.15.0"
+    "recharts": "https://esm.sh/recharts@^2.15.0",
+    "opencc-js": "https://esm.sh/opencc-js@^1.0.5"
   }
 }
-</script>
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
-<script>
-  window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-</script>
-<script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
-<link rel="stylesheet" href="/index.css">
+    </script>
+  <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+  <script>
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/dicom-parser@1.8.21/dist/dicomParser.min.js"></script>
+  <link rel="stylesheet" href="/index.css">
 </head>
-  <body class="bg-primary dark:bg-d-primary relative min-h-screen">
-    <div class="blob-bg">
-      <div class="aurora-blob aurora-1 top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-500 rounded-full"></div>
-      <div class="aurora-blob aurora-2 top-[-15%] right-[-10%] w-[45%] h-[55%] bg-blue-600 rounded-full"></div>
-      <div class="aurora-blob aurora-3 bottom-[-10%] left-[20%] w-[60%] h-[50%] bg-fuchsia-600 rounded-full"></div>
-      <div class="aurora-blob aurora-1 bottom-[-5%] right-[-15%] w-[40%] h-[60%] bg-teal-500 rounded-full"></div>
-    </div>
 
-    <div class="fixed inset-0 grid-bg z-[-1]"></div>
-    
-    <div class="vignette"></div>
-    <div class="noise-overlay"></div>
+<body class="bg-primary dark:bg-d-primary text-text-primary dark:text-d-text-primary transition-colors duration-500">
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-[-2]">
+    <div class="aurora-blob aurora-1 top-[-10%] left-[-10%] w-[60%] h-[60%] bg-indigo-500 rounded-full"></div>
+    <div class="aurora-blob aurora-2 top-[-15%] right-[-10%] w-[55%] h-[65%] bg-blue-600 rounded-full"></div>
+    <div class="aurora-blob aurora-3 bottom-[-10%] left-[20%] w-[70%] h-[60%] bg-fuchsia-600 rounded-full"></div>
+    <div class="aurora-blob aurora-1 bottom-[-5%] right-[-15%] w-[50%] h-[70%] bg-teal-500 rounded-full"></div>
+  </div>
+  <div class="fixed inset-0 grid-bg z-[-1] pointer-events-none"></div>
 
-    <div id="root" class="relative z-0"></div>
-    <div id="toast-portal"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+  <div id="root" class="relative z-0"></div>
+  <div id="toast-portal" class="fixed top-6 right-6 z-[1000] flex flex-col gap-3 pointer-events-none"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+
 </html>
