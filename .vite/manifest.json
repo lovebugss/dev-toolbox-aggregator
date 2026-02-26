@@ -2,8 +2,8 @@
     "name": "Dev Toolbox Aggregator",
     "icons": [
         {
-            "src": "favicon.ico",
-            "type": "image/x-icon",
+            "src": "favicon.png",
+            "type": "image/png",
             "sizes": "512x512"
         }
     ]
